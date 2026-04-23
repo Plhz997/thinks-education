@@ -9,10 +9,11 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
-  LogIn
+  LogIn,
+  AlertCircle
 } from 'lucide-react'
 import { useAppStore } from '@/store'
-import { mockUsers, majorNames } from '@/data/mockData'
+import { mockUsers, majorNames, validCredentials } from '@/data/mockData'
 import { useNavigate } from 'react-router-dom'
 
 const roleOptions = [
@@ -39,21 +40,40 @@ export function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [selectedMajor, setSelectedMajor] = useState<string | null>(null)
+  const [error, setError] = useState('')
   
   const { setUser } = useAppStore()
   const navigate = useNavigate()
 
   const handleLogin = () => {
-    const user = mockUsers[role]
+    setError('')
+    
+    if (!email || !password) {
+      setError('请输入邮箱和密码')
+      return
+    }
+
+    if (validCredentials[email] !== password) {
+      setError('邮箱或密码错误')
+      return
+    }
+
+    const roleUsers = mockUsers[role]
+    const user = roleUsers[major] || roleUsers['default']
+    
     if (user) {
       setUser({ ...user, major })
       navigate('/')
+    } else {
+      setError('用户不存在')
     }
   }
 
   const handleQuickLogin = (roleType: string) => {
     setRole(roleType)
-    const user = mockUsers[roleType as keyof typeof mockUsers]
+    const roleUsers = mockUsers[roleType as keyof typeof mockUsers]
+    const user = roleUsers[major] || roleUsers['default']
+    
     if (user) {
       setUser({ ...user, major })
       navigate('/')
@@ -210,6 +230,17 @@ export function Login() {
                 </div>
               </div>
             </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 p-3 bg-danger/10 text-danger rounded-xl mb-4"
+              >
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
 
             <motion.button
               onClick={handleLogin}

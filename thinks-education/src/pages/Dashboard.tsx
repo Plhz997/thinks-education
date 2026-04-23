@@ -14,7 +14,7 @@ import {
   Award
 } from 'lucide-react'
 import { useAppStore } from '@/store'
-import { mockUsers, mockCourses, mockTasks, mockLearningRecords, majorNames } from '@/data/mockData'
+import { mockCourses, mockTasks, mockLearningRecords, majorNames } from '@/data/mockData'
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer as LineResponsiveContainer } from 'recharts'
 
@@ -30,10 +30,9 @@ const learningTrendData = [
 ]
 
 export function Dashboard() {
-  const { user, growthDimensions, courses, tasks, learningRecords, setUser, closedLoopProgress } = useAppStore()
+  const { user, growthDimensions, courses, tasks, learningRecords, closedLoopProgress } = useAppStore()
 
   if (!user) {
-    setUser(mockUsers.student)
     return null
   }
 

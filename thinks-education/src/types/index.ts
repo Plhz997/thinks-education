@@ -64,6 +64,14 @@ export interface EthicsScenario {
   difficulty: number
 }
 
+export interface EthicsAIResult {
+  score: number
+  strengths: string[]
+  improvements: string[]
+  suggestions: string[]
+  analysis: string
+}
+
 export interface EthicsResponse {
   id: string
   scenarioId: string
@@ -75,6 +83,7 @@ export interface EthicsResponse {
     careStudents: number
     professionalDiscipline: number
   }
+  aiAnalysis?: EthicsAIResult
   reportUrl?: string
   timestamp: string
 }
@@ -96,7 +105,7 @@ export interface KnowledgePoint {
     type: string
     question: string
     options?: string[]
-    answer: string
+    answer: string | string[]
     explanation: string
   }[]
 }

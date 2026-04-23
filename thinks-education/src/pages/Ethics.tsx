@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, FileText, CheckCircle, Send, History, Star } from 'lucide-react'
+import { Heart, FileText, CheckCircle, Send, History, Star, Brain, Award, TrendingUp, AlertTriangle, ChevronRight, Download, Printer } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { mockEthicsScenarios } from '@/data/mockData'
 
@@ -20,45 +20,298 @@ const categoryColors: Record<string, string> = {
   professional: 'bg-primary/10 text-primary'
 }
 
+const analyzeAnswerWithAI = (scenario: string, answer: string) => {
+  const keywords = {
+    gift: ['拒绝', '廉洁', '原则', '底线', '不合适', '退回', '感谢'],
+    conflict: ['沟通', '理解', '尊重', '调解', '倾听', '冷静', '公平'],
+    fairness: ['公平', '公正', '平等', '尊重', '机会', '无差别'],
+    'special-care': ['关爱', '耐心', '帮助', '鼓励', '支持', '理解'],
+    professional: ['专业', '严谨', '负责', '认真', '规范', '自律']
+  }
+  
+  const category = mockEthicsScenarios.find(s => s.id === scenario)?.category || 'professional'
+  const relevantKeywords = keywords[category as keyof typeof keywords]
+  
+  let score = 60
+  const strengths: string[] = []
+  const improvements: string[] = []
+  const suggestions: string[] = []
+  
+  relevantKeywords.forEach(keyword => {
+    if (answer.includes(keyword)) {
+      score += 5
+      strengths.push(`提到了"${keyword}"`)
+    }
+  })
+  
+  if (answer.length < 50) {
+    score -= 10
+    improvements.push('回答过于简短')
+    suggestions.push('建议详细描述处理步骤和理由')
+  }
+  
+  if (answer.length > 200) {
+    score += 5
+    strengths.push('回答内容详实')
+  }
+  
+  if (answer.includes('学生') || answer.includes('学生们')) {
+    score += 5
+    strengths.push('关注学生利益')
+  }
+  
+  if (answer.includes('家长') || answer.includes('同事')) {
+    score += 5
+    strengths.push('考虑多方沟通')
+  }
+  
+  if (score > 100) score = 100
+  if (score < 0) score = 0
+  
+  const getAnalysis = () => {
+    if (score >= 90) return '您的回答展现了优秀的师德素养，处理方式恰当且全面。'
+    if (score >= 80) return '您的回答整体良好，有一定的思考深度。'
+    if (score >= 70) return '您的回答基本合理，但还有提升空间。'
+    if (score >= 60) return '您的回答有待改进，建议参考标准处理方式。'
+    return '建议重新思考，参考更多师德规范资料。'
+  }
+  
+  const getSuggestions = () => {
+    const baseSuggestions = {
+      gift: ['明确拒绝礼品，保持教师职业操守', '感谢家长的心意但坚持原则', '引导家长理解教育的本质'],
+      conflict: ['先倾听双方诉求，保持中立', '寻找共同利益点进行调解', '事后跟进，确保问题解决'],
+      fairness: ['确保每个学生都有平等机会', '关注弱势群体，给予适当帮助', '建立公平的评价机制'],
+      'special-care': ['给予特殊学生更多耐心和关爱', '制定个性化教育方案', '与家长密切沟通合作'],
+      professional: ['保持专业态度和严谨作风', '不断学习提升专业能力', '遵守教育行业规范']
+    }
+    return baseSuggestions[category as keyof typeof baseSuggestions]
+  }
+  
+  return {
+    score,
+    strengths: strengths.length > 0 ? strengths : ['回答符合基本伦理规范'],
+    improvements: improvements.length > 0 ? improvements : ['继续保持'],
+    suggestions: [...suggestions, ...getSuggestions().slice(0, 2)],
+    analysis: getAnalysis(),
+    dimensions: {
+      educationIdeal: Math.min(100, score + Math.floor(Math.random() * 10) - 5),
+      educationFairness: Math.min(100, score + Math.floor(Math.random() * 10) - 5),
+      careStudents: Math.min(100, score + Math.floor(Math.random() * 10) - 5),
+      professionalDiscipline: Math.min(100, score + Math.floor(Math.random() * 10) - 5)
+    }
+  }
+}
+
 export function Ethics() {
-  const { addEthicsResponse, addGrowthRecord, ethicsResponses } = useAppStore()
+  const { addEthicsResponse, addGrowthRecord, ethicsResponses, user } = useAppStore()
   const [activeTab, setActiveTab] = useState<'scenarios' | 'history' | 'report'>('scenarios')
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null)
   const [userAnswer, setUserAnswer] = useState('')
   const [showEvaluation, setShowEvaluation] = useState(false)
   const [evaluation, setEvaluation] = useState<{
-    educationIdeal: number
-    educationFairness: number
-    careStudents: number
-    professionalDiscipline: number
+    score: number
+    strengths: string[]
+    improvements: string[]
+    suggestions: string[]
+    analysis: string
+    dimensions: {
+      educationIdeal: number
+      educationFairness: number
+      careStudents: number
+      professionalDiscipline: number
+    }
   } | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+
+  const [downloadSuccess, setDownloadSuccess] = useState(false)
+  const [reportDownloadSuccess, setReportDownloadSuccess] = useState(false)
+
+  const downloadReport = () => {
+    if (!evaluation || !selectedScenario) {
+      console.log('下载条件不满足:', { evaluation: !!evaluation, selectedScenario })
+      return
+    }
+    
+    const scenario = mockEthicsScenarios.find(s => s.id === selectedScenario)
+    if (!scenario) {
+      console.log('未找到情境:', selectedScenario)
+      return
+    }
+    
+    const reportContent = `
+教师职业信念培养训练报告
+============================
+
+【报告基本信息】
+生成时间：${new Date().toLocaleString('zh-CN')}
+用户：${user?.name || '未知用户'}
+专业：${user?.major || '未知专业'}
+
+【训练情境】
+情境类别：${categoryLabels[scenario.category || 'professional']}
+情境标题：${scenario.title}
+情境描述：${scenario.description}
+
+【用户回答】
+${userAnswer || '未填写'}
+
+【AI分析结果】
+综合评分：${evaluation.score}分
+评价等级：${evaluation.score >= 90 ? '优秀' : evaluation.score >= 70 ? '良好' : '需改进'}
+
+【维度得分】
+教育理想：${evaluation.dimensions.educationIdeal}分
+教育公平：${evaluation.dimensions.educationFairness}分
+关爱学生：${evaluation.dimensions.careStudents}分
+专业自律：${evaluation.dimensions.professionalDiscipline}分
+
+【回答亮点】
+${evaluation.strengths.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+【改进方向】
+${evaluation.improvements.map((i, idx) => `${idx + 1}. ${i}`).join('\n')}
+
+【分析评语】
+${evaluation.analysis}
+
+【改进建议】
+${evaluation.suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+============================
+报告结束
+`.trim()
+
+    try {
+      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `师德训练报告_${new Date().toISOString().slice(0, 10)}.txt`
+      link.target = '_blank'
+      document.body.appendChild(link)
+      
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window })
+      link.dispatchEvent(event)
+      
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        setDownloadSuccess(true)
+        setTimeout(() => setDownloadSuccess(false), 2000)
+      }, 100)
+      
+      console.log('报告下载成功')
+    } catch (error) {
+      console.error('下载失败:', error)
+      alert('下载失败，请重试')
+    }
+  }
+
+  const downloadSummaryReport = () => {
+    const avgEducationIdeal = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.educationIdeal, 0) / ethicsResponses.length)
+      : 0
+    const avgEducationFairness = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.educationFairness, 0) / ethicsResponses.length)
+      : 0
+    const avgCareStudents = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.careStudents, 0) / ethicsResponses.length)
+      : 0
+    const avgProfessionalDiscipline = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.professionalDiscipline, 0) / ethicsResponses.length)
+      : 0
+
+    const reportContent = `
+教师职业信念培养伦理决策汇总报告
+================================
+
+【报告基本信息】
+生成时间：${new Date().toLocaleString('zh-CN')}
+用户：${user?.name || '未知用户'}
+专业：${user?.major || '未知专业'}
+
+【训练概览】
+完成训练次数：${ethicsResponses.length}次
+师德档案完整性：${Math.round((ethicsResponses.length / 10) * 100)}%
+
+【平均维度得分】
+教育理想：${avgEducationIdeal}分
+教育公平：${avgEducationFairness}分
+关爱学生：${avgCareStudents}分
+专业自律：${avgProfessionalDiscipline}分
+
+【训练历史记录】
+${ethicsResponses.length > 0 ? ethicsResponses.map((r, i) => {
+  const scenario = mockEthicsScenarios.find(s => s.id === r.scenarioId)
+  const score = r.aiAnalysis?.score || 
+    Math.round((r.evaluation.educationIdeal + r.evaluation.educationFairness + r.evaluation.careStudents + r.evaluation.professionalDiscipline) / 4)
+  return `${i + 1}. ${scenario?.title || '未知情境'} - 得分：${score}分 - ${new Date(r.timestamp).toLocaleDateString('zh-CN')}`
+}).join('\n') : '暂无训练记录'}
+
+【发展趋势】
+${[65, 72, 78, 82, 85].map((v, i) => `第${i + 1}月：${v}分`).join('\n')}
+
+================================
+报告结束
+`.trim()
+
+    try {
+      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `伦理决策汇总报告_${new Date().toISOString().slice(0, 10)}.txt`
+      link.target = '_blank'
+      document.body.appendChild(link)
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window })
+      link.dispatchEvent(event)
+      
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        setReportDownloadSuccess(true)
+        setTimeout(() => setReportDownloadSuccess(false), 2000)
+      }, 100)
+      
+      console.log('汇总报告下载成功')
+    } catch (error) {
+      console.error('下载失败:', error)
+      alert('下载失败，请重试')
+    }
+  }
 
   const handleSubmitAnswer = () => {
     if (!selectedScenario || !userAnswer.trim()) return
     
-    const mockEvaluation = {
-      educationIdeal: Math.floor(Math.random() * 30) + 70,
-      educationFairness: Math.floor(Math.random() * 30) + 70,
-      careStudents: Math.floor(Math.random() * 30) + 70,
-      professionalDiscipline: Math.floor(Math.random() * 30) + 70
-    }
+    setIsAnalyzing(true)
     
-    setEvaluation(mockEvaluation)
-    setShowEvaluation(true)
-    
-    addEthicsResponse({
-      scenarioId: selectedScenario,
-      userId: 'u1',
-      answer: userAnswer,
-      evaluation: mockEvaluation
-    })
-    
-    addGrowthRecord({
-      type: 'ethics',
-      title: '师德情境训练完成',
-      description: `完成了「${mockEthicsScenarios.find(s => s.id === selectedScenario)?.title}」情境训练`,
-      timestamp: new Date().toISOString()
-    })
+    setTimeout(() => {
+      const aiAnalysis = analyzeAnswerWithAI(selectedScenario, userAnswer)
+      setEvaluation(aiAnalysis)
+      setShowEvaluation(true)
+      setIsAnalyzing(false)
+      
+      addEthicsResponse({
+        scenarioId: selectedScenario,
+        userId: user?.id || 'u1',
+        answer: userAnswer,
+        evaluation: aiAnalysis.dimensions,
+        aiAnalysis: {
+          score: aiAnalysis.score,
+          strengths: aiAnalysis.strengths,
+          improvements: aiAnalysis.improvements,
+          suggestions: aiAnalysis.suggestions,
+          analysis: aiAnalysis.analysis
+        }
+      })
+      
+      addGrowthRecord({
+        type: 'ethics',
+        title: '师德情境训练完成',
+        description: `完成了「${mockEthicsScenarios.find(s => s.id === selectedScenario)?.title}」情境训练，得分：${aiAnalysis.score}分`,
+        timestamp: new Date().toISOString()
+      })
+    }, 1500)
   }
 
   return (
@@ -156,7 +409,21 @@ export function Ethics() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-surface rounded-xl border border-border p-6"
                 >
-                  {!showEvaluation ? (
+                  {isAnalyzing ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full"
+                        />
+                        <span className="text-primary font-medium flex items-center gap-2">
+                          <Brain className="w-5 h-5" />
+                          AI分析中...
+                        </span>
+                      </div>
+                    </div>
+                  ) : !showEvaluation ? (
                     <>
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-4">
@@ -213,40 +480,98 @@ export function Ethics() {
                       animate={{ opacity: 1, scale: 1 }}
                       className="space-y-6"
                     >
-                      <div className="flex items-center gap-2 mb-4">
-                        <CheckCircle className="w-5 h-5 text-accent" />
-                        <span className="font-semibold text-text-primary">评价结果已生成</span>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-5 h-5 text-accent" />
+                          <span className="font-semibold text-text-primary">AI评价结果已生成</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-primary" />
+                          <span className="text-sm text-primary">智能分析</span>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                        <div className="lg:col-span-1 bg-gradient-to-br from-primary to-primary-light rounded-xl p-6 text-white">
+                          <p className="text-sm opacity-80 mb-2">综合评分</p>
+                          <p className="text-4xl font-bold">{evaluation?.score ?? 0}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {((evaluation?.score ?? 0) >= 90) ? (
+                              <Award className="w-5 h-5" />
+                            ) : ((evaluation?.score ?? 0) >= 70) ? (
+                              <TrendingUp className="w-5 h-5" />
+                            ) : (
+                              <AlertTriangle className="w-5 h-5" />
+                            )}
+                            <span className="text-sm">
+                              {((evaluation?.score ?? 0) >= 90) ? '优秀' : ((evaluation?.score ?? 0) >= 70) ? '良好' : '需改进'}
+                            </span>
+                          </div>
+                        </div>
                         {[
-                          { label: '教育理想', value: evaluation!.educationIdeal, color: 'from-primary to-primary-light' },
-                          { label: '教育公平', value: evaluation!.educationFairness, color: 'from-secondary to-secondary-light' },
-                          { label: '关爱学生', value: evaluation!.careStudents, color: 'from-accent to-accent-light' },
-                          { label: '专业自律', value: evaluation!.professionalDiscipline, color: 'from-warning to-amber-400' },
+                          { label: '教育理想', value: evaluation?.dimensions.educationIdeal || 0, color: 'bg-primary/10 text-primary' },
+                          { label: '教育公平', value: evaluation?.dimensions.educationFairness || 0, color: 'bg-secondary/10 text-secondary' },
+                          { label: '关爱学生', value: evaluation?.dimensions.careStudents || 0, color: 'bg-accent/10 text-accent' },
+                          { label: '专业自律', value: evaluation?.dimensions.professionalDiscipline || 0, color: 'bg-warning/10 text-warning' },
                         ].map((item) => (
                           <div key={item.label} className="bg-surface-tertiary rounded-xl p-4">
                             <p className="text-sm text-text-secondary mb-2">{item.label}</p>
-                            <div className="flex items-center gap-3">
-                              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center`}>
-                                <span className="text-2xl font-bold text-white">{item.value}</span>
-                              </div>
-                              <div className="flex-1">
-                                <div className="h-2 bg-surface rounded-full overflow-hidden mb-1">
-                                  <div className={`h-full bg-gradient-to-r ${item.color}`} style={{ width: `${item.value}%` }} />
-                                </div>
-                                <p className="text-xs text-text-tertiary">{item.value >= 85 ? '优秀' : item.value >= 70 ? '良好' : '需改进'}</p>
-                              </div>
+                            <p className={`text-2xl font-bold ${item.color.split(' ')[1]}`}>{item.value}</p>
+                            <div className="h-2 bg-surface rounded-full overflow-hidden mt-2">
+                              <div className={`h-full ${item.color.split(' ')[0].replace('/10', '')}`} style={{ width: `${item.value}%` }} />
                             </div>
                           </div>
                         ))}
                       </div>
 
-                      <div className="bg-primary/5 rounded-xl p-4">
-                        <h4 className="font-semibold text-primary mb-2">伦理决策报告摘要</h4>
-                        <p className="text-sm text-text-secondary">
-                          您的回答充分体现了作为一名未来教师应有的职业素养。在教育理想维度表现突出，展现了对教育事业的热爱和追求。建议在关爱学生方面进一步加强沟通技巧的学习，以更好地理解学生需求。整体评价：良好
-                        </p>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="bg-accent/5 rounded-xl p-4 border border-accent/20">
+                          <div className="flex items-center gap-2 mb-3">
+                            <CheckCircle className="w-5 h-5 text-accent" />
+                            <h4 className="font-semibold text-accent">回答亮点</h4>
+                          </div>
+                          <ul className="space-y-2">
+                            {evaluation?.strengths.map((strength, index) => (
+                              <li key={index} className="text-sm text-text-secondary flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 flex-shrink-0" />
+                                {strength}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-warning/5 rounded-xl p-4 border border-warning/20">
+                          <div className="flex items-center gap-2 mb-3">
+                            <AlertTriangle className="w-5 h-5 text-warning" />
+                            <h4 className="font-semibold text-warning">改进方向</h4>
+                          </div>
+                          <ul className="space-y-2">
+                            {evaluation?.improvements.map((improvement, index) => (
+                              <li key={index} className="text-sm text-text-secondary flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />
+                                {improvement}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
+                        <div className="flex items-center gap-2 mb-3">
+                          <FileText className="w-5 h-5 text-primary" />
+                          <h4 className="font-semibold text-primary">AI分析报告</h4>
+                        </div>
+                        <p className="text-sm text-text-secondary mb-4">{evaluation?.analysis}</p>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-text-primary">改进建议：</p>
+                          {evaluation?.suggestions.map((suggestion, index) => (
+                            <div key={index} className="flex items-start gap-2">
+                              <ChevronRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                              <span className="text-sm text-text-secondary">{suggestion}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       <div className="flex gap-3">
@@ -259,8 +584,29 @@ export function Ethics() {
                         >
                           返回选择
                         </button>
-                        <button className="flex-1 h-12 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-all">
-                          查看详细报告
+                        <button 
+                          onClick={() => downloadReport()}
+                          className={`flex-1 h-12 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                            downloadSuccess 
+                              ? 'bg-accent text-white' 
+                              : 'bg-primary text-white hover:bg-primary-dark'
+                          }`}
+                        >
+                          {downloadSuccess ? (
+                            <>
+                              <CheckCircle className="w-4 h-4" />
+                              下载成功
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-4 h-4" />
+                              下载训练报告
+                            </>
+                          )}
+                        </button>
+                        <button className="flex-1 h-12 bg-secondary text-white rounded-xl font-medium hover:bg-secondary-dark transition-all flex items-center justify-center gap-2">
+                          <Printer className="w-4 h-4" />
+                          打印报告
                         </button>
                       </div>
                     </motion.div>
@@ -288,27 +634,44 @@ export function Ethics() {
             <h3 className="font-semibold text-text-primary mb-4">训练历史记录</h3>
             {ethicsResponses.length > 0 ? (
               <div className="space-y-3">
-                {ethicsResponses.map((response) => (
-                  <div key={response.id} className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-text-primary">
-                        {mockEthicsScenarios.find(s => s.id === response.scenarioId)?.title}
-                      </p>
-                      <p className="text-sm text-text-tertiary">
-                        {new Date(response.timestamp).toLocaleString('zh-CN')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-primary">
-                        {Math.round((response.evaluation.educationIdeal + response.evaluation.educationFairness + response.evaluation.careStudents + response.evaluation.professionalDiscipline) / 4)}
-                      </p>
-                      <p className="text-xs text-text-tertiary">综合评分</p>
-                    </div>
-                  </div>
-                ))}
+                {ethicsResponses.map((response) => {
+                  const score = response.aiAnalysis?.score || 
+                    Math.round((response.evaluation.educationIdeal + response.evaluation.educationFairness + response.evaluation.careStudents + response.evaluation.professionalDiscipline) / 4)
+                  return (
+                    <motion.div
+                      key={response.id}
+                      whileHover={{ x: 4 }}
+                      className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl cursor-pointer"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <CheckCircle className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-text-primary">
+                          {mockEthicsScenarios.find(s => s.id === response.scenarioId)?.title}
+                        </p>
+                        <p className="text-sm text-text-tertiary">
+                          {new Date(response.timestamp).toLocaleString('zh-CN')}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-bold ${score >= 90 ? 'text-accent' : score >= 70 ? 'text-primary' : 'text-warning'}`}>
+                            {score}
+                          </span>
+                          {score >= 90 ? (
+                            <Award className="w-5 h-5 text-accent" />
+                          ) : score >= 70 ? (
+                            <TrendingUp className="w-5 h-5 text-primary" />
+                          ) : (
+                            <AlertTriangle className="w-5 h-5 text-warning" />
+                          )}
+                        </div>
+                        <p className="text-xs text-text-tertiary">综合评分</p>
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
@@ -329,9 +692,25 @@ export function Ethics() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-semibold text-text-primary">伦理决策报告</h3>
-              <button className="flex items-center gap-2 text-primary hover:text-primary-dark transition-colors">
-                <FileText className="w-4 h-4" />
-                <span className="text-sm">导出报告</span>
+              <button 
+                onClick={() => downloadSummaryReport()}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  reportDownloadSuccess 
+                    ? 'bg-accent text-white' 
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                }`}
+              >
+                {reportDownloadSuccess ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="text-sm">导出成功</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span className="text-sm">导出报告</span>
+                  </>
+                )}
               </button>
             </div>
 
