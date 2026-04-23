@@ -1,296 +1,208 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, BookOpen, Link2, Video, FileText, Download, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
-import { mockKnowledgePoints, majorNames } from '@/data/mockData'
-import { useAppStore } from '@/store'
+import { BookOpen, Search, Download, ChevronRight, Play, FileText, Tag, Lightbulb, ExternalLink } from 'lucide-react'
+import { mockKnowledgePoints } from '@/data/mockData'
 
 const subjectOptions = [
   { value: 'math', label: '数学' },
   { value: 'chinese', label: '语文' },
-  { value: 'english', label: '英语' },
   { value: 'physics', label: '物理' },
   { value: 'chemistry', label: '化学' },
   { value: 'biology', label: '生物' },
-  { value: 'history', label: '历史' },
-  { value: 'geography', label: '地理' },
+  { value: 'computer', label: '计算机' },
+]
+
+const textbookVersions = [
+  { id: 'v1', name: '人教版高中数学必修一', subject: 'math' },
+  { id: 'v2', name: '北师大版高中数学', subject: 'math' },
+  { id: 'v3', name: '苏教版高中数学', subject: 'math' },
 ]
 
 export function Knowledge() {
-  const { user } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('math')
-  const [selectedPoint, setSelectedPoint] = useState(mockKnowledgePoints[0])
-  const [graphScale, setGraphScale] = useState(1)
+  const [selectedPoint, setSelectedPoint] = useState<string | null>(null)
+  const [selectedTextbook, setSelectedTextbook] = useState('v1')
 
   const filteredPoints = mockKnowledgePoints.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.description.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const renderGraphNode = (point: typeof mockKnowledgePoints[0], x: number, y: number) => {
-    const isSelected = selectedPoint?.id === point.id
-    return (
-      <g key={point.id}>
-        {selectedPoint && selectedPoint.relatedPoints.includes(point.id) && (
-          <motion.line
-            x1={200}
-            y1={200}
-            x2={x}
-            y2={y}
-            stroke="#5B21B6"
-            strokeWidth={2}
-            strokeDasharray="5,5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5 }}
-          />
-        )}
-        <motion.g
-          onClick={() => setSelectedPoint(point)}
-          className="cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <circle
-            cx={x}
-            cy={y}
-            r={isSelected ? 35 : 30}
-            fill={isSelected ? '#5B21B6' : '#0891B2'}
-            className="transition-all"
-          />
-          <text
-            x={x}
-            y={y + 6}
-            textAnchor="middle"
-            fill="white"
-            fontSize={isSelected ? 14 : 12}
-            fontWeight="bold"
-          >
-            {point.name.slice(0, 4)}
-          </text>
-        </motion.g>
-      </g>
-    )
-  }
+  const selectedPointData = mockKnowledgePoints.find(p => p.id === selectedPoint)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">教育教材导向课程匹配</h1>
-          <p className="text-text-secondary mt-1">基于教材和课程标准，进行知识脉络匹配与强化学习</p>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-secondary to-secondary-light rounded-2xl p-6 text-white"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold">教育教材导向课程匹配</h1>
+            <p className="text-white/80 text-sm">基于教材和课程标准的知识脉络匹配与强化学习</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="px-4 py-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors text-sm font-medium flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              导出大纲
+            </button>
+          </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
-          <Download className="w-4 h-4" />
-          导出知识大纲
-        </button>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-3"
-        >
-          <div className="bg-surface rounded-xl border border-border p-6">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-text-secondary mb-2">学科选择</label>
-              <div className="grid grid-cols-2 gap-2">
-                {subjectOptions.map((subject) => (
-                  <button
-                    key={subject.value}
-                    onClick={() => setSelectedSubject(subject.value)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
-                      selectedSubject === subject.value
-                        ? 'bg-primary text-white'
-                        : 'bg-surface-tertiary text-text-secondary hover:bg-primary/5 hover:text-primary'
-                    }`}
-                  >
-                    {subject.label}
-                  </button>
-                ))}
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1 space-y-4">
+          <div className="bg-surface rounded-xl border border-border p-4">
+            <label className="block text-sm font-medium text-text-secondary mb-2">学科选择</label>
+            <div className="grid grid-cols-2 gap-2">
+              {subjectOptions.map((subject) => (
+                <button
+                  key={subject.value}
+                  onClick={() => setSelectedSubject(subject.value)}
+                  className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    selectedSubject === subject.value
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-tertiary text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  {subject.label}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div className="relative mb-4">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <div className="bg-surface rounded-xl border border-border p-4">
+            <label className="block text-sm font-medium text-text-secondary mb-2">教材版本</label>
+            <select
+              value={selectedTextbook}
+              onChange={(e) => setSelectedTextbook(e.target.value)}
+              className="w-full h-10 px-3 rounded-xl bg-surface-tertiary border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              {textbookVersions.filter(v => v.subject === selectedSubject).map((version) => (
+                <option key={version.id} value={version.id}>{version.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-surface rounded-xl border border-border p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜索知识点..."
-                className="w-full h-10 pl-10 pr-4 rounded-lg bg-surface-tertiary border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-tertiary border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-
-            <div>
-              <p className="text-sm font-medium text-text-secondary mb-2">知识点列表</p>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {filteredPoints.map((point) => (
-                  <button
-                    key={point.id}
-                    onClick={() => setSelectedPoint(point)}
-                    className={`w-full p-3 rounded-xl text-left transition-all ${
-                      selectedPoint?.id === point.id
-                        ? 'bg-primary text-white'
-                        : 'bg-surface-tertiary text-text-secondary hover:bg-primary/5 hover:text-primary'
-                    }`}
-                  >
-                    <p className="font-medium">{point.name}</p>
-                    <p className="text-xs opacity-70">{point.description}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-9 space-y-6"
-        >
-          <div className="bg-surface rounded-xl border border-border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <BookOpen className="w-6 h-6 text-primary" />
-                <h2 className="font-semibold text-text-primary">知识图谱</h2>
-                <span className="text-sm text-text-secondary">{majorNames[user?.major || 'math']}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setGraphScale(Math.max(0.5, graphScale - 0.1))}
-                  className="p-2 rounded-lg bg-surface-tertiary hover:bg-primary/5 transition-colors"
-                >
-                  <ZoomOut className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setGraphScale(Math.min(1.5, graphScale + 0.1))}
-                  className="p-2 rounded-lg bg-surface-tertiary hover:bg-primary/5 transition-colors"
-                >
-                  <ZoomIn className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setGraphScale(1)}
-                  className="p-2 rounded-lg bg-surface-tertiary hover:bg-primary/5 transition-colors"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            
-            <div className="relative h-80 bg-surface-tertiary rounded-xl overflow-hidden">
-              <svg 
-                viewBox="0 0 400 400" 
-                className="w-full h-full"
-                style={{ transform: `scale(${graphScale})`, transformOrigin: 'center' }}
-              >
-                <defs>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                
-                <circle cx="200" cy="200" r="150" fill="#5B21B6" fillOpacity="0.05" />
-                <circle cx="200" cy="200" r="100" fill="#0891B2" fillOpacity="0.05" />
-                <circle cx="200" cy="200" r="50" fill="#10B981" fillOpacity="0.05" />
-                
-                {selectedPoint && renderGraphNode(selectedPoint, 200, 200)}
-                {mockKnowledgePoints.filter(p => p.id !== selectedPoint?.id).map((point, index) => {
-                  const angle = (index * Math.PI * 2) / (mockKnowledgePoints.length - 1)
-                  const radius = 120
-                  const x = 200 + radius * Math.cos(angle)
-                  const y = 200 + radius * Math.sin(angle)
-                  return renderGraphNode(point, x, y)
-                })}
-              </svg>
-              
-              <div className="absolute bottom-4 left-4 flex items-center gap-4 text-sm text-text-secondary">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                  <span>核心知识点</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-secondary" />
-                  <span>关联知识点</span>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {selectedPoint && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-surface rounded-xl border border-border p-6"
-              >
-                <h3 className="font-semibold text-text-primary mb-4">{selectedPoint.name}</h3>
-                <p className="text-text-secondary mb-4">{selectedPoint.description}</p>
-                
-                {selectedPoint.relatedPoints.length > 0 && (
+          <div className="bg-surface rounded-xl border border-border overflow-hidden">
+            <div className="p-4 border-b border-border">
+              <h3 className="font-semibold text-text-primary">知识图谱</h3>
+            </div>
+            <div className="p-4 space-y-2 max-h-80 overflow-y-auto">
+              {filteredPoints.map((point) => (
+                <motion.button
+                  key={point.id}
+                  onClick={() => setSelectedPoint(point.id)}
+                  whileHover={{ x: 4 }}
+                  className={`w-full text-left p-3 rounded-lg transition-all ${
+                    selectedPoint === point.id
+                      ? 'bg-primary/10 border border-primary/30'
+                      : 'hover:bg-surface-tertiary'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-text-primary text-sm">{point.name}</span>
+                    <ChevronRight className={`w-4 h-4 ${selectedPoint === point.id ? 'text-primary' : 'text-text-tertiary'}`} />
+                  </div>
+                  <p className="text-xs text-text-tertiary mt-1 line-clamp-1">{point.description}</p>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-3">
+          {selectedPointData ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="bg-surface rounded-xl border border-border p-6">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-sm font-medium text-text-secondary mb-2">关联知识点</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedPoint.relatedPoints.map((rpId) => {
-                        const relatedPoint = mockKnowledgePoints.find(p => p.id === rpId)
-                        return relatedPoint ? (
-                          <button
-                            key={rpId}
-                            onClick={() => setSelectedPoint(relatedPoint)}
-                            className="px-3 py-1 bg-surface-tertiary rounded-lg text-sm text-text-primary hover:bg-primary/5 hover:text-primary transition-colors"
-                          >
-                            {relatedPoint.name}
-                          </button>
-                        ) : null
-                      })}
+                    <div className="flex items-center gap-2 mb-2">
+                      <Tag className="w-4 h-4 text-primary" />
+                      <span className="text-sm text-primary">知识点</span>
                     </div>
+                    <h2 className="text-xl font-bold text-text-primary">{selectedPointData.name}</h2>
+                  </div>
+                  <button className="flex items-center gap-2 text-secondary hover:text-secondary-dark transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                    <span className="text-sm">查看详情</span>
+                  </button>
+                </div>
+                <p className="text-text-secondary mb-4">{selectedPointData.description}</p>
+
+                {selectedPointData.relatedPoints.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-sm text-text-secondary">关联知识点：</span>
+                    {selectedPointData.relatedPoints.map((rp) => {
+                      const related = mockKnowledgePoints.find(p => p.id === rp)
+                      return related ? (
+                        <button
+                          key={rp}
+                          onClick={() => setSelectedPoint(rp)}
+                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
+                        >
+                          {related.name}
+                        </button>
+                      ) : null
+                    })}
                   </div>
                 )}
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-surface rounded-xl border border-border p-6"
-              >
-                <h3 className="font-semibold text-text-primary mb-4">学习资源</h3>
-                <div className="space-y-3">
-                  {selectedPoint.resources.length > 0 ? (
-                    selectedPoint.resources.map((resource) => (
-                      <div key={resource.id} className="flex items-center gap-3 p-3 bg-surface-tertiary rounded-lg hover:bg-primary/5 transition-colors cursor-pointer">
-                        {resource.type === 'video' && <Video className="w-5 h-5 text-secondary" />}
-                        {resource.type === 'document' && <FileText className="w-5 h-5 text-primary" />}
-                        {resource.type === 'link' && <Link2 className="w-5 h-5 text-accent" />}
+              {selectedPointData.resources.length > 0 && (
+                <div className="bg-surface rounded-xl border border-border p-6">
+                  <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-primary" />
+                    学习资源
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedPointData.resources.map((resource) => (
+                      <div key={resource.id} className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl hover:bg-primary/5 transition-colors cursor-pointer">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          resource.type === 'video' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info'
+                        }`}>
+                          {resource.type === 'video' ? <Play className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+                        </div>
                         <div className="flex-1">
                           <p className="font-medium text-text-primary">{resource.title}</p>
-                          {resource.duration && (
-                            <p className="text-xs text-text-tertiary">{resource.duration}分钟</p>
-                          )}
+                          <p className="text-sm text-text-tertiary">
+                            {resource.type === 'video' ? `${resource.duration}分钟视频` : '文档资料'}
+                          </p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-text-tertiary" />
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-text-tertiary text-center py-4">暂无资源</p>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </motion.div>
+              )}
 
-              {selectedPoint.exercises.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="md:col-span-2 bg-surface rounded-xl border border-border p-6"
-                >
-                  <h3 className="font-semibold text-text-primary mb-4">推荐练习</h3>
+              {selectedPointData.exercises.length > 0 && (
+                <div className="bg-surface rounded-xl border border-border p-6">
+                  <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5 text-warning" />
+                    推荐练习
+                  </h3>
                   <div className="space-y-4">
-                    {selectedPoint.exercises.map((exercise) => (
+                    {selectedPointData.exercises.map((exercise) => (
                       <div key={exercise.id} className="p-4 bg-surface-tertiary rounded-xl">
                         <p className="text-text-primary mb-3">{exercise.question}</p>
                         {exercise.options && (
@@ -298,29 +210,37 @@ export function Knowledge() {
                             {exercise.options.map((option, idx) => (
                               <button
                                 key={idx}
-                                className={`p-2 rounded-lg text-left transition-all ${
-                                  String.fromCharCode(65 + idx) === exercise.answer
-                                    ? 'bg-accent/10 text-accent border border-accent'
+                                className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                                  exercise.answer === String.fromCharCode(65 + idx)
+                                    ? 'bg-accent/10 text-accent border border-accent/30'
                                     : 'bg-surface border border-border hover:border-primary/50'
                                 }`}
                               >
-                                <span className="font-medium mr-2">{String.fromCharCode(65 + idx)}.</span>
-                                {option}
+                                {String.fromCharCode(65 + idx)}. {option}
                               </button>
                             ))}
                           </div>
                         )}
-                        <div className="p-3 bg-accent/5 rounded-lg">
-                          <p className="text-sm text-accent font-medium">解析：{exercise.explanation}</p>
+                        <div className="bg-accent/5 rounded-lg p-3">
+                          <p className="text-sm text-accent font-medium">解析：</p>
+                          <p className="text-sm text-text-secondary mt-1">{exercise.explanation}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
+            </motion.div>
+          ) : (
+            <div className="bg-surface rounded-xl border border-border p-12 text-center">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary/10 to-primary/10 flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-10 h-10 text-secondary" />
+              </div>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">选择一个知识点</h3>
+              <p className="text-text-secondary">从左侧知识图谱中选择一个知识点查看详情</p>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

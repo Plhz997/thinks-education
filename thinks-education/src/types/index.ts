@@ -1,25 +1,12 @@
-export type Role = 'student' | 'teacher' | 'admin'
-
-export type Major = 
-  | 'primary-education'
-  | 'preschool-education'
-  | 'physical-education'
-  | 'educational-technology'
-  | 'chinese'
-  | 'math'
-  | 'computer-education'
-  | 'special-education'
-
 export interface User {
   id: string
   name: string
-  role: Role
-  major: Major
-  avatar: string
+  role: 'student' | 'teacher' | 'admin'
+  major: string
+  avatar?: string
   email: string
-  phone?: string
-  school?: string
-  department?: string
+  school: string
+  department: string
   grade?: string
   class?: string
   semester?: string
@@ -33,7 +20,7 @@ export interface Course {
   progress: number
   status: 'completed' | 'in-progress' | 'not-started'
   type: 'required' | 'elective'
-  major: Major
+  major?: string
 }
 
 export interface Task {
@@ -42,13 +29,13 @@ export interface Task {
   description: string
   dueDate: string
   priority: 'high' | 'medium' | 'low'
-  status: 'completed' | 'pending' | 'in-progress'
+  status: 'pending' | 'completed'
   type: 'course' | 'practice' | 'ethics' | 'internship'
 }
 
 export interface LearningRecord {
   id: string
-  type: 'course' | 'practice' | 'qa' | 'ethics' | 'review'
+  type: 'course' | 'practice' | 'qa' | 'ethics'
   title: string
   timestamp: string
   duration?: number
@@ -61,11 +48,19 @@ export interface GrowthDimension {
   maxScore: number
 }
 
+export interface QAMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: string
+  type?: string
+}
+
 export interface EthicsScenario {
   id: string
   title: string
   description: string
-  category: 'gift' | 'conflict' | 'fairness' | 'special-care' | 'professional'
+  category: string
   difficulty: number
 }
 
@@ -73,14 +68,14 @@ export interface EthicsResponse {
   id: string
   scenarioId: string
   userId: string
-  response: string
+  answer: string
   evaluation: {
     educationIdeal: number
     educationFairness: number
     careStudents: number
-    professionalEthics: number
+    professionalDiscipline: number
   }
-  report: string
+  reportUrl?: string
   timestamp: string
 }
 
@@ -88,43 +83,42 @@ export interface KnowledgePoint {
   id: string
   name: string
   description: string
-  parentId?: string
   relatedPoints: string[]
-  resources: Resource[]
-  exercises: Exercise[]
+  resources: {
+    id: string
+    title: string
+    type: string
+    url: string
+    duration?: number
+  }[]
+  exercises: {
+    id: string
+    type: string
+    question: string
+    options?: string[]
+    answer: string
+    explanation: string
+  }[]
 }
 
-export interface Resource {
+export interface StudentProfile {
+  userId: string
+  learningProgress: number
+  knowledgeMastery: Record<string, number>
+  teachingSkills: Record<string, number>
+  ethicsDevelopment: number
+  activityLevel: number
+  interests: string[]
+  internshipPreference: string[]
+}
+
+export interface GrowthRecord {
   id: string
+  type: 'course' | 'practice' | 'qa' | 'ethics' | 'certification' | 'badge'
   title: string
-  type: 'video' | 'document' | 'image' | 'link'
-  url: string
-  duration?: number
-}
-
-export interface Exercise {
-  id: string
-  type: 'single' | 'multiple' | 'essay' | 'code'
-  question: string
-  options?: string[]
-  answer: string
-  explanation: string
-}
-
-export interface QAMessage {
-  id: string
-  content: string
-  sender: 'user' | 'ai'
+  description: string
   timestamp: string
-  type?: 'theory' | 'design' | 'management' | 'lesson-plan' | 'grading' | 'code'
-}
-
-export interface TeachingSkill {
-  id: string
-  name: string
-  category: 'lesson-plan' | '试讲' | 'blackboard' | 'tools'
-  score: number
-  maxScore: number
+  metadata?: Record<string, unknown>
 }
 
 export interface InternshipOpportunity {
@@ -139,29 +133,9 @@ export interface InternshipOpportunity {
   matchScore: number
 }
 
-export interface GrowthRecord {
-  id: string
-  type: 'course' | 'practice' | 'qa' | 'ethics' | 'review' | 'certification' | 'badge'
-  title: string
-  description: string
-  timestamp: string
-  metadata?: Record<string, unknown>
-}
-
 export interface FeedbackMetric {
   name: string
   score: number
   maxScore: number
   suggestion: string
-}
-
-export interface StudentProfile {
-  userId: string
-  learningProgress: number
-  knowledgeMastery: Record<string, number>
-  teachingSkills: Record<string, number>
-  ethicsDevelopment: number
-  activityLevel: number
-  interests: string[]
-  internshipPreference: string[]
 }

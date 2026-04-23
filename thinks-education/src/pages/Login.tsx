@@ -1,232 +1,247 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { User, Lock, Mail, ChevronDown, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { 
+  Mail, 
+  Lock, 
+  GraduationCap, 
+  BookOpen, 
+  Settings,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  LogIn
+} from 'lucide-react'
 import { useAppStore } from '@/store'
 import { mockUsers, majorNames } from '@/data/mockData'
-import type { Role, Major } from '@/types'
+import { useNavigate } from 'react-router-dom'
 
-const roles: { value: Role; label: string; icon: React.ReactNode }[] = [
-  { value: 'student', label: '师范生', icon: <User className="w-5 h-5" /> },
-  { value: 'teacher', label: '指导教师', icon: <User className="w-5 h-5" /> },
-  { value: 'admin', label: '教学院管理员', icon: <User className="w-5 h-5" /> },
+const roleOptions = [
+  { value: 'student', label: '师范生', icon: GraduationCap },
+  { value: 'teacher', label: '指导教师', icon: BookOpen },
+  { value: 'admin', label: '教学院管理员', icon: Settings },
 ]
 
-const majors: { value: Major; label: string }[] = [
+const majorOptions = [
+  { value: 'math', label: '数学教育' },
+  { value: 'chinese', label: '语文教育' },
   { value: 'primary-education', label: '小学教育' },
   { value: 'preschool-education', label: '学前教育' },
   { value: 'physical-education', label: '体育教育' },
   { value: 'educational-technology', label: '教育技术学' },
-  { value: 'chinese', label: '语文教育' },
-  { value: 'math', label: '数学教育' },
   { value: 'computer-education', label: '计算机师范' },
   { value: 'special-education', label: '特殊教育' },
 ]
 
 export function Login() {
-  const [selectedRole, setSelectedRole] = useState<Role>('student')
-  const [selectedMajor, setSelectedMajor] = useState<Major>('math')
+  const [role, setRole] = useState('student')
+  const [major, setMajor] = useState('math')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showMajorDropdown, setShowMajorDropdown] = useState(false)
+  const [selectedMajor, setSelectedMajor] = useState<string | null>(null)
+  
   const { setUser } = useAppStore()
+  const navigate = useNavigate()
 
   const handleLogin = () => {
-    const mockUser = { ...mockUsers[selectedRole], major: selectedMajor }
-    setUser(mockUser)
-    window.location.href = '/dashboard'
+    const user = mockUsers[role]
+    if (user) {
+      setUser({ ...user, major })
+      navigate('/')
+    }
   }
 
-  const handleQuickLogin = (role: Role) => {
-    setSelectedRole(role)
-    setEmail(mockUsers[role].email)
-    setPassword('123456')
+  const handleQuickLogin = (roleType: string) => {
+    setRole(roleType)
+    const user = mockUsers[roleType as keyof typeof mockUsers]
+    if (user) {
+      setUser({ ...user, major })
+      navigate('/')
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface-secondary via-white to-primary/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-8"
-        >
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <span className="text-white font-bold text-2xl">T</span>
+    <div className="min-h-screen bg-gradient-to-br from-surface-secondary via-primary/5 to-secondary/5 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-4xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 text-white"
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                <GraduationCap className="w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-text-primary">Thinks行世教育</h1>
-                <p className="text-text-secondary">AI智联体赋能强师工程</p>
+                <h1 className="text-2xl font-bold">Thinks 行世教育</h1>
+                <p className="text-white/80 text-sm">AI智联体 · 赋能强师工程</p>
               </div>
             </div>
-            <p className="text-text-secondary text-lg">
+            
+            <h2 className="text-3xl font-bold mb-4">培养未来卓越教师</h2>
+            <p className="text-white/80 mb-8">
               面向师范生的专业教育服务平台，提供从理论学习到实践技能提升的一站式智能培养解决方案。
             </p>
-          </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            {['课程学习', '实践训练', '职业发展'].map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.1 }}
-                className="bg-surface rounded-xl p-4 border border-border"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-                  <span className="text-primary font-bold">{index + 1}</span>
-                </div>
-                <p className="font-medium text-text-primary">{item}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="relative h-48 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
-                  强师工程
-                </div>
-                <p className="text-text-secondary">重构师范教育"教、学、评"闭环</p>
-              </div>
-            </div>
-            <div className="absolute top-4 right-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl" />
-            <div className="absolute bottom-4 left-4 w-16 h-16 bg-secondary/20 rounded-full blur-2xl" />
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-surface rounded-2xl shadow-lg p-8"
-        >
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-text-primary mb-2">欢迎登录</h2>
-            <p className="text-text-secondary">请选择您的身份并登录</p>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-sm font-medium text-text-secondary mb-3">选择身份</p>
-            <div className="grid grid-cols-3 gap-3">
-              {roles.map((role) => (
-                <button
-                  key={role.value}
-                  onClick={() => setSelectedRole(role.value)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    selectedRole === role.value
-                      ? 'border-primary bg-primary/5 text-primary'
-                      : 'border-border hover:border-primary/50 text-text-secondary'
-                  }`}
+            <div className="space-y-4">
+              {[
+                { title: '师德素养', desc: '践行四有好老师标准' },
+                { title: '教学技能', desc: '全方位实训提升' },
+                { title: '智能助教', desc: 'AI驱动个性化学习' },
+                { title: '成长档案', desc: '完整记录成长轨迹' },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                  className="flex items-center gap-4 p-4 bg-white/10 rounded-xl"
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    selectedRole === role.value ? 'bg-primary/10' : 'bg-surface-tertiary'
-                  }`}>
-                    {role.icon}
+                  <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                    <span className="font-bold">{index + 1}</span>
                   </div>
-                  <span className="text-sm font-medium">{role.label}</span>
-                </button>
+                  <div>
+                    <p className="font-semibold">{item.title}</p>
+                    <p className="text-sm text-white/70">{item.desc}</p>
+                  </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mb-6">
-            <p className="text-sm font-medium text-text-secondary mb-3">选择专业方向</p>
-            <div className="relative">
-              <button
-                onClick={() => setShowMajorDropdown(!showMajorDropdown)}
-                className="w-full h-12 px-4 rounded-xl border border-border bg-surface flex items-center justify-between text-text-primary hover:border-primary/50 transition-colors"
-              >
-                <span>{majorNames[selectedMajor]}</span>
-                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform ${showMajorDropdown ? 'rotate-180' : ''}`} />
-              </button>
-              {showMajorDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-lg z-10 overflow-hidden"
-                >
-                  {majors.map((major) => (
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-surface rounded-3xl border border-border p-8"
+          >
+            <h2 className="text-2xl font-bold text-text-primary mb-2">欢迎回来</h2>
+            <p className="text-text-secondary mb-8">请选择身份并登录系统</p>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-text-secondary mb-3">选择身份</label>
+              <div className="grid grid-cols-3 gap-3">
+                {roleOptions.map((option) => {
+                  const Icon = option.icon
+                  return (
                     <button
-                      key={major.value}
-                      onClick={() => {
-                        setSelectedMajor(major.value)
-                        setShowMajorDropdown(false)
-                      }}
-                      className={`w-full px-4 py-3 text-left hover:bg-surface-tertiary transition-colors ${
-                        selectedMajor === major.value ? 'bg-primary/5 text-primary' : 'text-text-primary'
+                      key={option.value}
+                      onClick={() => setRole(option.value)}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        role === option.value
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/50'
                       }`}
                     >
-                      {major.label}
+                      <Icon className={`w-6 h-6 mb-2 ${role === option.value ? 'text-primary' : 'text-text-secondary'}`} />
+                      <p className={`text-sm font-medium ${role === option.value ? 'text-primary' : 'text-text-primary'}`}>
+                        {option.label}
+                      </p>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-text-secondary mb-3">专业方向</label>
+              <div className="flex items-center gap-2 p-3 bg-surface-tertiary rounded-xl cursor-pointer" onClick={() => setSelectedMajor(selectedMajor === null ? 'open' : null)}>
+                <span className="text-text-primary">{majorNames[major]}</span>
+                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform ${selectedMajor === 'open' ? 'rotate-180' : ''}`} />
+              </div>
+              {selectedMajor === 'open' && (
+                <div className="mt-2 p-2 bg-surface border border-border rounded-xl max-h-48 overflow-y-auto">
+                  {majorOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setMajor(option.value)
+                        setSelectedMajor(null)
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                        major === option.value ? 'bg-primary/10 text-primary' : 'hover:bg-surface-tertiary'
+                      }`}
+                    >
+                      {option.label}
                     </button>
                   ))}
-                </motion.div>
+                </div>
               )}
             </div>
-          </div>
 
-          <div className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">邮箱</label>
-              <div className="relative">
-                <Mail className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="请输入邮箱"
-                  className="w-full h-12 pl-12 pr-4 rounded-xl border border-border bg-surface-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">邮箱</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="请输入邮箱"
+                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-surface-tertiary border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">密码</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="请输入密码"
+                    className="w-full h-12 pl-10 pr-12 rounded-xl bg-surface-tertiary border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                  <button
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">密码</label>
-              <div className="relative">
-                <Lock className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="请输入密码"
-                  className="w-full h-12 pl-12 pr-12 rounded-xl border border-border bg-surface-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-                <button
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+
+            <motion.button
+              onClick={handleLogin}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full h-12 bg-gradient-to-r from-primary to-primary-light text-white font-semibold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+            >
+              <LogIn className="w-5 h-5" />
+              登录
+            </motion.button>
+
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="text-sm text-text-secondary mb-3 text-center">或快速登录</p>
+              <div className="grid grid-cols-3 gap-3">
+                {roleOptions.map((option) => {
+                  const Icon = option.icon
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => handleQuickLogin(option.value)}
+                      className="p-3 border border-border rounded-xl hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center gap-2"
+                    >
+                      <Icon className="w-5 h-5 text-text-secondary" />
+                      <span className="text-xs text-text-secondary">{option.label}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
-          </div>
-
-          <button
-            onClick={handleLogin}
-            className="w-full h-12 bg-gradient-to-r from-primary to-primary-light text-white font-medium rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-          >
-            <span>登录</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-sm text-text-secondary mb-3 text-center">快速登录</p>
-            <div className="grid grid-cols-3 gap-3">
-              {roles.map((role) => (
-                <button
-                  key={role.value}
-                  onClick={() => handleQuickLogin(role.value)}
-                  className="p-3 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all text-sm text-text-secondary hover:text-primary"
-                >
-                  {role.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   )
 }

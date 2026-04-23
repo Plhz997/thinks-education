@@ -1,495 +1,377 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  FileText, 
-  Video, 
-  PenTool, 
-  Monitor, 
-  Play, 
-  Square,
-  Mic,
-  Camera,
-  AlertCircle,
-  CheckCircle,
-  ChevronRight,
-  Sparkles
-} from 'lucide-react'
-import { mockFeedbackMetrics } from '@/data/mockData'
+import { FileText, PenTool, Video, Play, Download, Edit3, Save, Eye, CheckCircle, Clock, Lightbulb, Layout, Bold, Italic, List, AlignLeft } from 'lucide-react'
+import { useAppStore } from '@/store'
 
-const tabs = [
-  { id: 'lesson-plan', label: '智能教案', icon: FileText },
-  { id: 'practice', label: '虚拟试讲', icon: Video },
-  { id: 'blackboard', label: '板书设计', icon: PenTool },
-  { id: 'tools', label: '教学工具', icon: Monitor },
+const mockLessonPlans = [
+  { id: 'lp1', title: '三角函数的图像与性质', subject: '数学', grade: '高一', status: 'draft', lastModified: '2024-04-22' },
+  { id: 'lp2', title: '导数的概念', subject: '数学', grade: '高二', status: 'review', lastModified: '2024-04-20' },
+  { id: 'lp3', title: '等差数列', subject: '数学', grade: '高一', status: 'approved', lastModified: '2024-04-18' },
 ]
 
-const gradeOptions = ['小学', '初中', '高中']
-const subjectOptions = ['语文', '数学', '英语', '物理', '化学', '生物']
+const mockBoardworks = [
+  { id: 'b1', title: '二次函数图像', views: 128, likes: 24, date: '2024-04-21' },
+  { id: 'b2', title: '立体几何三视图', views: 96, likes: 18, date: '2024-04-19' },
+  { id: 'b3', title: '概率树状图', views: 74, likes: 15, date: '2024-04-15' },
+]
+
+const mockMicrocourses = [
+  { id: 'm1', title: '微课 - 函数单调性', duration: 8, views: 256, status: 'published' },
+  { id: 'm2', title: '微课 - 数列求和', duration: 10, views: 189, status: 'draft' },
+]
 
 export function SkillTraining() {
-  const [activeTab, setActiveTab] = useState('lesson-plan')
-  const [selectedGrade, setSelectedGrade] = useState('初中')
-  const [selectedSubject, setSelectedSubject] = useState('数学')
-  const [courseTheme, setCourseTheme] = useState('')
-  const [teachingObjective, setTeachingObjective] = useState('')
-  const [isPracticing, setIsPracticing] = useState(false)
-  const [showFeedback, setShowFeedback] = useState(false)
+  const { addGrowthRecord } = useAppStore()
+  const [activeTab, setActiveTab] = useState<'lesson-plan' | 'boardwork' | 'microcourse'>('lesson-plan')
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [editorContent, setEditorContent] = useState(`# 教学目标
 
-  const mockLessonPlan = {
-    title: '三角函数的图像与性质',
-    grade: '高中',
-    subject: '数学',
-    duration: '45分钟',
-    objectives: ['理解正弦函数的图像特征', '掌握三角函数的周期性', '能够应用三角函数解决实际问题'],
-    procedures: [
-      { step: '导入', content: '复习角的概念，引入三角函数', duration: '5分钟' },
-      { step: '新授', content: '讲解正弦函数的定义和图像', duration: '15分钟' },
-      { step: '探究', content: '小组讨论三角函数的性质', duration: '10分钟' },
-      { step: '练习', content: '课堂练习，巩固知识点', duration: '10分钟' },
-      { step: '总结', content: '总结本节课重点内容', duration: '5分钟' },
-    ],
-    materials: ['PPT课件', '三角函数图像教具', '练习题单'],
+## 知识与技能
+- 理解三角函数的基本概念
+- 掌握三角函数的图像特征
+
+## 过程与方法
+- 通过图像观察，培养学生的直观想象能力
+- 通过小组讨论，培养学生的合作交流能力
+
+## 情感态度与价值观
+- 激发学生对数学的兴趣
+- 培养学生的科学探究精神
+
+# 教学重难点
+
+**重点：**
+- 三角函数的图像绘制
+- 三角函数的周期性
+
+**难点：**
+- 三角函数图像的变换
+- 实际问题中的三角函数应用
+
+# 教学方法
+- 讲授法
+- 演示法
+- 小组讨论法
+
+# 教学过程
+## 导入（5分钟）
+通过生活中的周期现象引入课题
+
+## 新授（25分钟）
+1. 三角函数的定义
+2. 三角函数的图像
+3. 三角函数的性质
+
+## 巩固练习（10分钟）
+课堂练习与提问
+
+## 课堂小结（5分钟）
+总结本节课内容`)
+
+  const handleSavePlan = () => {
+    addGrowthRecord({
+      type: 'practice',
+      title: '教案保存',
+      description: '保存了教案设计',
+      timestamp: new Date().toISOString()
+    })
+  }
+
+  const handleGeneratePlan = () => {
+    setEditorContent(`# 教案生成结果
+
+## 教学目标
+- 知识目标：理解并掌握导数的概念
+- 能力目标：培养学生的抽象思维能力
+- 情感目标：激发学生的求知欲
+
+## 教学内容
+1. 导数的定义
+2. 导数的几何意义
+3. 导数的计算
+
+## 教学过程
+采用启发式教学，引导学生自主探究`)
+    addGrowthRecord({
+      type: 'practice',
+      title: 'AI教案生成',
+      description: '使用AI生成教案设计',
+      timestamp: new Date().toISOString()
+    })
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">教学技能实训平台</h1>
-          <p className="text-text-secondary mt-1">提升师范生试讲、教案、板书、教学工具使用能力</p>
+          <h1 className="text-2xl font-bold text-text-primary">技能实训</h1>
+          <p className="text-text-secondary mt-1">提升教学技能，包括教案设计、板书练习、微课制作</p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex gap-2 p-1 bg-surface rounded-xl border border-border">
-        {tabs.map((tab) => {
-          const Icon = tab.icon
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-primary text-white'
-                  : 'text-text-secondary hover:bg-surface-tertiary'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
-
-      {activeTab === 'lesson-plan' && (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          whileHover={{ y: -4 }}
+          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
+            activeTab === 'lesson-plan' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+          }`}
+          onClick={() => setActiveTab('lesson-plan')}
         >
-          <div className="space-y-6">
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">教案参数设置</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-text-secondary mb-2">学段</label>
-                  <div className="flex flex-wrap gap-2">
-                    {gradeOptions.map((grade) => (
-                      <button
-                        key={grade}
-                        onClick={() => setSelectedGrade(grade)}
-                        className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-                          selectedGrade === grade
-                            ? 'bg-primary text-white'
-                            : 'bg-surface-tertiary text-text-secondary hover:bg-primary/5'
-                        }`}
-                      >
-                        {grade}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-text-secondary mb-2">学科</label>
-                  <div className="flex flex-wrap gap-2">
-                    {subjectOptions.map((subject) => (
-                      <button
-                        key={subject}
-                        onClick={() => setSelectedSubject(subject)}
-                        className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-                          selectedSubject === subject
-                            ? 'bg-primary text-white'
-                            : 'bg-surface-tertiary text-text-secondary hover:bg-primary/5'
-                        }`}
-                      >
-                        {subject}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 space-y-4">
-                <div>
-                  <label className="block text-sm text-text-secondary mb-2">课程主题</label>
-                  <input
-                    type="text"
-                    value={courseTheme}
-                    onChange={(e) => setCourseTheme(e.target.value)}
-                    placeholder="请输入课程主题..."
-                    className="w-full h-10 px-4 rounded-xl bg-surface-tertiary border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-text-secondary mb-2">教学目标</label>
-                  <textarea
-                    value={teachingObjective}
-                    onChange={(e) => setTeachingObjective(e.target.value)}
-                    placeholder="请输入教学目标..."
-                    className="w-full h-24 px-4 py-3 bg-surface-tertiary border border-border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                  />
-                </div>
-              </div>
-              <button className="mt-4 w-full py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                生成教案框架
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+            <FileText className="w-6 h-6 text-primary" />
+          </div>
+          <h3 className="font-semibold text-text-primary mb-2">教案设计</h3>
+          <p className="text-sm text-text-secondary">AI辅助教案生成与管理</p>
+          <div className="mt-4 flex items-center gap-2 text-sm">
+            <span className="px-2 py-1 bg-surface-tertiary rounded-lg text-text-tertiary">3 份教案</span>
+          </div>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ y: -4 }}
+          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
+            activeTab === 'boardwork' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+          }`}
+          onClick={() => setActiveTab('boardwork')}
+        >
+          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+            <PenTool className="w-6 h-6 text-accent" />
+          </div>
+          <h3 className="font-semibold text-text-primary mb-2">板书练习</h3>
+          <p className="text-sm text-text-secondary">规范书写与板书设计训练</p>
+          <div className="mt-4 flex items-center gap-2 text-sm">
+            <span className="px-2 py-1 bg-surface-tertiary rounded-lg text-text-tertiary">8 次练习</span>
+          </div>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ y: -4 }}
+          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
+            activeTab === 'microcourse' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+          }`}
+          onClick={() => setActiveTab('microcourse')}
+        >
+          <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-4">
+            <Video className="w-6 h-6 text-secondary" />
+          </div>
+          <h3 className="font-semibold text-text-primary mb-2">微课制作</h3>
+          <p className="text-sm text-text-secondary">录制和编辑教学微视频</p>
+          <div className="mt-4 flex items-center gap-2 text-sm">
+            <span className="px-2 py-1 bg-surface-tertiary rounded-lg text-text-tertiary">2 个微课</span>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="bg-surface rounded-xl border border-border">
+        {activeTab === 'lesson-plan' && (
+          <div>
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-text-primary">我的教案</h3>
+              <button 
+                onClick={() => setSelectedPlan('new')}
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2 hover:bg-primary-dark transition-colors"
+              >
+                <Edit3 className="w-4 h-4" />
+                新建教案
               </button>
             </div>
-
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">教案合规性检测</h3>
-              <div className="space-y-3">
-                {[
-                  { item: '教学目标符合课程标准', status: 'pass' },
-                  { item: '教学流程合理', status: 'pass' },
-                  { item: '评价方式多元化', status: 'pass' },
-                  { item: '技术整合恰当', status: 'warning' },
-                  { item: '差异化教学设计', status: 'pass' },
-                ].map((check) => (
-                  <div key={check.item} className="flex items-center justify-between p-3 bg-surface-tertiary rounded-lg">
-                    <span className="text-sm text-text-primary">{check.item}</span>
-                    {check.status === 'pass' ? (
-                      <CheckCircle className="w-5 h-5 text-accent" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-warning" />
-                    )}
-                  </div>
+            <div className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mockLessonPlans.map((plan) => (
+                  <motion.div
+                    key={plan.id}
+                    whileHover={{ y: -2 }}
+                    className="p-4 bg-surface-tertiary rounded-xl border border-border hover:border-primary/30 cursor-pointer"
+                    onClick={() => setSelectedPlan(plan.id)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium text-text-primary">{plan.title}</h4>
+                      {plan.status === 'approved' && <CheckCircle className="w-5 h-5 text-success" />}
+                      {plan.status === 'review' && <Clock className="w-5 h-5 text-warning" />}
+                      {plan.status === 'draft' && <Edit3 className="w-5 h-5 text-text-tertiary" />}
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-text-secondary">
+                      <span>{plan.subject}</span>
+                      <span>·</span>
+                      <span>{plan.grade}</span>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-sm">
+                      <span className="text-text-tertiary">修改于 {plan.lastModified}</span>
+                      <div className="flex items-center gap-2">
+                        <button className="p-1.5 hover:bg-surface rounded-lg">
+                          <Eye className="w-4 h-4 text-text-secondary" />
+                        </button>
+                        <button className="p-1.5 hover:bg-surface rounded-lg">
+                          <Edit3 className="w-4 h-4 text-text-secondary" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           </div>
+        )}
 
-          <div className="bg-surface rounded-xl border border-border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-text-primary">生成的教案框架</h3>
-              <span className="text-sm text-text-secondary">AI生成</span>
+        {activeTab === 'boardwork' && (
+          <div>
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-text-primary">板书练习记录</h3>
+              <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2 hover:bg-primary-dark transition-colors">
+                <PenTool className="w-4 h-4" />
+                开始练习
+              </button>
             </div>
-            
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-text-primary">{mockLessonPlan.title}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-sm px-2 py-0.5 bg-primary/10 text-primary rounded">{mockLessonPlan.grade}</span>
-                    <span className="text-sm px-2 py-0.5 bg-secondary/10 text-secondary rounded">{mockLessonPlan.subject}</span>
-                    <span className="text-sm text-text-tertiary">{mockLessonPlan.duration}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-text-primary mb-3">教学目标</h4>
-                <ul className="space-y-2">
-                  {mockLessonPlan.objectives.map((obj, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center flex-shrink-0 text-sm">
-                        {idx + 1}
-                      </span>
-                      <span className="text-text-secondary">{obj}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-text-primary mb-3">教学流程</h4>
-                <div className="space-y-3">
-                  {mockLessonPlan.procedures.map((proc) => (
-                    <div key={proc.step} className="flex items-center gap-4 p-3 bg-surface-tertiary rounded-lg">
-                      <span className="w-16 text-sm font-medium text-primary">{proc.step}</span>
-                      <span className="flex-1 text-sm text-text-secondary">{proc.content}</span>
-                      <span className="text-sm text-text-tertiary">{proc.duration}</span>
+            <div className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mockBoardworks.map((boardwork) => (
+                  <motion.div
+                    key={boardwork.id}
+                    whileHover={{ y: -2 }}
+                    className="bg-surface-tertiary rounded-xl overflow-hidden border border-border"
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                      <div className="text-center">
+                        <Layout className="w-12 h-12 text-text-tertiary mx-auto mb-2" />
+                        <p className="text-text-secondary text-sm">{boardwork.title}</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-text-primary mb-3">推荐资源</h4>
-                <div className="flex flex-wrap gap-2">
-                  {mockLessonPlan.materials.map((material) => (
-                    <span key={material} className="px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg text-sm">
-                      {material}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button className="flex-1 py-2 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors">
-                  编辑教案
-                </button>
-                <button className="flex-1 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
-                  保存教案
-                </button>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-text-secondary">
+                          <span>{boardwork.views} 次观看</span>
+                          <span>{boardwork.likes} 赞</span>
+                        </div>
+                        <span className="text-xs text-text-tertiary">{boardwork.date}</span>
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <button className="flex-1 py-2 border border-primary text-primary rounded-lg text-sm hover:bg-primary hover:text-white transition-colors">
+                          查看
+                        </button>
+                        <button className="flex-1 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark transition-colors">
+                          练习
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
-        </motion.div>
-      )}
+        )}
 
-      {activeTab === 'practice' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-        >
-          <div className="lg:col-span-2">
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <div className="relative h-96 bg-surface-tertiary rounded-xl flex items-center justify-center">
-                {isPracticing ? (
-                  <div className="text-center">
-                    <div className="w-20 h-20 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
-                      <Camera className="w-10 h-10 text-danger" />
-                    </div>
-                    <p className="text-text-secondary">正在录制试讲...</p>
-                    <p className="text-sm text-text-tertiary">已录制: 05:32</p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                      <Video className="w-10 h-10 text-primary" />
-                    </div>
-                    <p className="text-text-secondary">虚拟试讲区域</p>
-                    <p className="text-sm text-text-tertiary">点击下方按钮开始试讲</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-center gap-4 mt-6">
-                <button
-                  onClick={() => setIsPracticing(!isPracticing)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
-                    isPracticing
-                      ? 'bg-danger text-white'
-                      : 'bg-primary text-white hover:opacity-90'
-                  }`}
-                >
-                  {isPracticing ? (
-                    <>
-                      <Square className="w-5 h-5" />
-                      结束试讲
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-5 h-5" />
-                      开始试讲
-                    </>
-                  )}
-                </button>
-                <button className="flex items-center gap-2 px-6 py-3 border border-border rounded-xl hover:bg-surface-tertiary transition-colors">
-                  <Mic className="w-5 h-5" />
-                  麦克风设置
-                </button>
-              </div>
-
-              {showFeedback && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 p-4 bg-accent/10 rounded-xl"
-                >
-                  <p className="text-accent font-medium mb-2">试讲分析完成！</p>
-                  <p className="text-sm text-text-secondary">以下是您的试讲反馈报告</p>
-                </motion.div>
-              )}
+        {activeTab === 'microcourse' && (
+          <div>
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-text-primary">我的微课</h3>
+              <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2 hover:bg-primary-dark transition-colors">
+                <Video className="w-4 h-4" />
+                录制微课
+              </button>
             </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">试讲反馈指标</h3>
+            <div className="p-4">
               <div className="space-y-4">
-                {mockFeedbackMetrics.map((metric) => (
-                  <div key={metric.name}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-text-primary">{metric.name}</span>
-                      <span className="text-sm font-medium text-primary">{metric.score}</span>
+                {mockMicrocourses.map((microcourse) => (
+                  <div key={microcourse.id} className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl">
+                    <div className="w-24 h-14 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Play className="w-6 h-6 text-primary" />
                     </div>
-                    <div className="relative h-2 bg-surface-tertiary rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
-                        style={{ width: `${metric.score}%` }}
-                      />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-text-primary">{microcourse.title}</h4>
+                      <div className="flex items-center gap-3 mt-1 text-sm text-text-secondary">
+                        <span>{microcourse.duration} 分钟</span>
+                        <span>{microcourse.views} 次观看</span>
+                        {microcourse.status === 'published' && <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded">已发布</span>}
+                        {microcourse.status === 'draft' && <span className="px-2 py-0.5 bg-warning/10 text-warning text-xs rounded">草稿</span>}
+                      </div>
                     </div>
-                    <p className="text-xs text-text-secondary mt-1">{metric.suggestion}</p>
+                    <div className="flex items-center gap-2">
+                      <button className="p-2 hover:bg-surface rounded-lg">
+                        <Play className="w-5 h-5 text-text-secondary" />
+                      </button>
+                      <button className="p-2 hover:bg-surface rounded-lg">
+                        <Edit3 className="w-5 h-5 text-text-secondary" />
+                      </button>
+                      <button className="p-2 hover:bg-surface rounded-lg">
+                        <Download className="w-5 h-5 text-text-secondary" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">评分详情</h3>
-              <div className="text-center">
-                <div className="relative w-24 h-24 mx-auto">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle cx="48" cy="48" r="42" fill="none" stroke="#E2E8F0" strokeWidth="10" />
-                    <motion.circle
-                      cx="48" cy="48" r="42" fill="none" stroke="#5B21B6" strokeWidth="10"
-                      strokeLinecap="round"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 0.82 }}
-                      transition={{ duration: 1 }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary">82</span>
-                  </div>
-                </div>
-                <p className="text-sm text-text-secondary mt-2">综合评分</p>
-                <button className="mt-4 w-full py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity" onClick={() => setShowFeedback(true)}>
-                  查看详细报告
-                </button>
-              </div>
-            </div>
           </div>
-        </motion.div>
-      )}
+        )}
+      </div>
 
-      {activeTab === 'blackboard' && (
+      {selectedPlan && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedPlan(null)}
         >
-          <div className="bg-surface rounded-xl border border-border p-6">
-            <h3 className="font-semibold text-text-primary mb-4">板书设计</h3>
-            <div className="relative h-80 bg-surface-tertiary rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <PenTool className="w-12 h-12 text-primary mx-auto mb-4" />
-                <p className="text-text-secondary">板书设计区域</p>
-                <p className="text-sm text-text-tertiary">支持手写输入和模板选择</p>
+          <motion.div
+            initial={{ scale: 0.95, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-surface rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+          >
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold text-text-primary">教案编辑器</h2>
               </div>
-            </div>
-            
-            <div className="mt-4 flex gap-2">
-              {['标题式', '提纲式', '图示式', '表格式'].map((template) => (
+              <div className="flex items-center gap-2">
                 <button
-                  key={template}
-                  className="px-3 py-2 bg-surface-tertiary rounded-lg text-sm text-text-secondary hover:bg-primary/5 hover:text-primary transition-colors"
+                  onClick={handleGeneratePlan}
+                  className="px-3 py-1.5 border border-primary text-primary rounded-lg text-sm flex items-center gap-2 hover:bg-primary/5 transition-colors"
                 >
-                  {template}
+                  <Lightbulb className="w-4 h-4" />
+                  AI生成
                 </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">OCR识别结果</h3>
-              <div className="p-4 bg-surface-tertiary rounded-xl">
-                <p className="text-sm text-text-secondary">
-                  <strong>识别内容：</strong><br />
-                  三角函数的图像与性质<br />
-                  一、正弦函数 y = sin(x)<br />
-                  二、余弦函数 y = cos(x)<br />
-                  三、周期性与对称性
-                </p>
+                <button
+                  onClick={handleSavePlan}
+                  className="px-3 py-1.5 bg-primary text-white rounded-lg text-sm flex items-center gap-2 hover:bg-primary-dark transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  保存
+                </button>
+                <button onClick={() => setSelectedPlan(null)} className="text-text-tertiary hover:text-text-primary">
+                  ✕
+                </button>
               </div>
             </div>
-
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">板书评价</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-text-primary">布局评分</span>
-                    <span className="text-sm font-medium text-accent">85分</span>
-                  </div>
-                  <div className="relative h-2 bg-surface-tertiary rounded-full overflow-hidden">
-                    <div className="h-full bg-accent rounded-full" style={{ width: '85%' }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-text-primary">重点突出度</span>
-                    <span className="text-sm font-medium text-primary">92分</span>
-                  </div>
-                  <div className="relative h-2 bg-surface-tertiary rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: '92%' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'tools' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-        >
-          <div className="lg:col-span-2">
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">虚拟训练环境</h3>
-              <div className="relative h-80 bg-surface-tertiary rounded-xl flex items-center justify-center">
-                <div className="text-center">
-                  <Monitor className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <p className="text-text-secondary">希沃白板/雨课堂训练环境</p>
-                  <p className="text-sm text-text-tertiary">模拟真实教学工具操作</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">工具培训课程</h3>
-              <div className="space-y-3">
-                {[
-                  { title: '希沃白板基础操作', progress: 75 },
-                  { title: '雨课堂互动功能', progress: 50 },
-                  { title: 'PPT高级技巧', progress: 30 },
-                  { title: '在线教学平台使用', progress: 0 },
-                ].map((course) => (
-                  <div key={course.title} className="p-3 bg-surface-tertiary rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-text-primary">{course.title}</span>
-                      <span className="text-xs text-text-tertiary">{course.progress}%</span>
-                    </div>
-                    <div className="relative h-1.5 bg-surface rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${course.progress}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="font-semibold text-text-primary mb-4">故障情景训练</h3>
-              <div className="space-y-3">
-                {['设备连接失败', '网络中断', '软件崩溃', '投影故障'].map((scenario) => (
-                  <button key={scenario} className="w-full flex items-center justify-between p-3 bg-surface-tertiary rounded-lg hover:bg-primary/5 transition-colors">
-                    <span className="text-sm text-text-primary">{scenario}</span>
-                    <ChevronRight className="w-4 h-4 text-text-tertiary" />
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="bg-surface-tertiary rounded-xl border border-border overflow-hidden">
+                <div className="flex items-center gap-1 p-2 border-b border-border bg-surface">
+                  <button className="p-1.5 hover:bg-surface-tertiary rounded-lg">
+                    <Bold className="w-4 h-4 text-text-secondary" />
                   </button>
-                ))}
+                  <button className="p-1.5 hover:bg-surface-tertiary rounded-lg">
+                    <Italic className="w-4 h-4 text-text-secondary" />
+                  </button>
+                  <div className="w-px h-6 bg-border mx-2"></div>
+                  <button className="p-1.5 hover:bg-surface-tertiary rounded-lg">
+                    <List className="w-4 h-4 text-text-secondary" />
+                  </button>
+                  <button className="p-1.5 hover:bg-surface-tertiary rounded-lg">
+                    <AlignLeft className="w-4 h-4 text-text-secondary" />
+                  </button>
+                </div>
+                <textarea
+                  value={editorContent}
+                  onChange={(e) => setEditorContent(e.target.value)}
+                  className="w-full h-[500px] p-4 bg-transparent focus:outline-none resize-none font-mono text-sm text-text-primary leading-relaxed"
+                  placeholder="开始编写教案..."
+                />
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </div>

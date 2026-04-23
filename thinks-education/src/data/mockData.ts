@@ -20,7 +20,7 @@ export const mockUsers: Record<string, User> = {
     role: 'teacher',
     major: 'math',
     avatar: '',
-    email: 'li教授@thinks.edu.cn',
+    email: 'li@thinks.edu.cn',
     school: '教育学院',
     department: '数学教育系'
   },
@@ -37,12 +37,42 @@ export const mockUsers: Record<string, User> = {
 }
 
 export const mockCourses: Course[] = [
-  { id: 'c1', name: '教育学原理', code: 'EDU101', credits: 3, progress: 95, status: 'completed', type: 'required', major: 'math' },
-  { id: 'c2', name: '教育心理学', code: 'EDU102', credits: 3, progress: 80, status: 'in-progress', type: 'required', major: 'math' },
-  { id: 'c3', name: '数学课程与教学论', code: 'MATH201', credits: 4, progress: 60, status: 'in-progress', type: 'required', major: 'math' },
-  { id: 'c4', name: '现代教育技术', code: 'EDU201', credits: 2, progress: 100, status: 'completed', type: 'required', major: 'math' },
-  { id: 'c5', name: '教育测量与评价', code: 'EDU202', credits: 2, progress: 30, status: 'in-progress', type: 'elective', major: 'math' },
-  { id: 'c6', name: '数学思维方法', code: 'MATH202', credits: 3, progress: 0, status: 'not-started', type: 'elective', major: 'math' },
+  { id: 'c1', name: '教育学原理', code: 'EDU101', credits: 3, progress: 95, status: 'completed', type: 'required' },
+  { id: 'c2', name: '教育心理学', code: 'EDU102', credits: 3, progress: 80, status: 'in-progress', type: 'required' },
+  { id: 'c3', name: '现代教育技术', code: 'EDU201', credits: 2, progress: 100, status: 'completed', type: 'required' },
+  { id: 'c4', name: '教育测量与评价', code: 'EDU202', credits: 2, progress: 30, status: 'in-progress', type: 'elective' },
+  
+  { id: 'm1', name: '数学课程与教学论', code: 'MATH201', credits: 4, progress: 60, status: 'in-progress', type: 'required', major: 'math' },
+  { id: 'm2', name: '数学思维方法', code: 'MATH202', credits: 3, progress: 0, status: 'not-started', type: 'elective', major: 'math' },
+  { id: 'm3', name: '中学数学解题研究', code: 'MATH203', credits: 3, progress: 45, status: 'in-progress', type: 'required', major: 'math' },
+  
+  { id: 'ch1', name: '语文课程与教学论', code: 'CHIN201', credits: 4, progress: 65, status: 'in-progress', type: 'required', major: 'chinese' },
+  { id: 'ch2', name: '文学作品解读', code: 'CHIN202', credits: 3, progress: 20, status: 'in-progress', type: 'elective', major: 'chinese' },
+  { id: 'ch3', name: '古代汉语', code: 'CHIN203', credits: 3, progress: 80, status: 'completed', type: 'required', major: 'chinese' },
+  
+  { id: 'pe1', name: '体育课程与教学论', code: 'PE201', credits: 4, progress: 55, status: 'in-progress', type: 'required', major: 'physical-education' },
+  { id: 'pe2', name: '运动生理学', code: 'PE202', credits: 3, progress: 70, status: 'completed', type: 'required', major: 'physical-education' },
+  { id: 'pe3', name: '体育训练学', code: 'PE203', credits: 3, progress: 15, status: 'not-started', type: 'elective', major: 'physical-education' },
+  
+  { id: 'te1', name: '教育技术学导论', code: 'TECH201', credits: 4, progress: 75, status: 'completed', type: 'required', major: 'educational-technology' },
+  { id: 'te2', name: '多媒体课件制作', code: 'TECH202', credits: 3, progress: 40, status: 'in-progress', type: 'required', major: 'educational-technology' },
+  { id: 'te3', name: '教育大数据分析', code: 'TECH203', credits: 3, progress: 0, status: 'not-started', type: 'elective', major: 'educational-technology' },
+  
+  { id: 'pri1', name: '小学教育学', code: 'PRIM201', credits: 4, progress: 85, status: 'completed', type: 'required', major: 'primary-education' },
+  { id: 'pri2', name: '小学课程与教学', code: 'PRIM202', credits: 4, progress: 50, status: 'in-progress', type: 'required', major: 'primary-education' },
+  { id: 'pri3', name: '小学生心理学', code: 'PRIM203', credits: 3, progress: 30, status: 'in-progress', type: 'required', major: 'primary-education' },
+  
+  { id: 'pre1', name: '学前教育学', code: 'PRE201', credits: 4, progress: 90, status: 'completed', type: 'required', major: 'preschool-education' },
+  { id: 'pre2', name: '幼儿心理学', code: 'PRE202', credits: 3, progress: 65, status: 'in-progress', type: 'required', major: 'preschool-education' },
+  { id: 'pre3', name: '幼儿园课程设计', code: 'PRE203', credits: 4, progress: 25, status: 'in-progress', type: 'required', major: 'preschool-education' },
+  
+  { id: 'comp1', name: '程序设计基础', code: 'COMP201', credits: 4, progress: 80, status: 'completed', type: 'required', major: 'computer-education' },
+  { id: 'comp2', name: '教育软件工程', code: 'COMP202', credits: 3, progress: 50, status: 'in-progress', type: 'required', major: 'computer-education' },
+  { id: 'comp3', name: '人工智能教育应用', code: 'COMP203', credits: 3, progress: 15, status: 'not-started', type: 'elective', major: 'computer-education' },
+  
+  { id: 'spe1', name: '特殊教育学', code: 'SPE201', credits: 4, progress: 70, status: 'completed', type: 'required', major: 'special-education' },
+  { id: 'spe2', name: '特殊儿童心理学', code: 'SPE202', credits: 3, progress: 45, status: 'in-progress', type: 'required', major: 'special-education' },
+  { id: 'spe3', name: '融合教育', code: 'SPE203', credits: 3, progress: 20, status: 'in-progress', type: 'elective', major: 'special-education' },
 ]
 
 export const mockTasks: Task[] = [

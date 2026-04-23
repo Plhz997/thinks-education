@@ -1,161 +1,168 @@
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   LayoutDashboard, 
   Heart, 
   BookOpen, 
   MessageCircle, 
-  GraduationCap, 
+  RefreshCw, 
   Video, 
-  Code, 
-  Sparkles, 
+  PenTool, 
+  Target, 
   FolderOpen, 
   Briefcase, 
-  Settings, 
-  ChevronLeft, 
+  Settings,
+  ChevronLeft,
   ChevronRight,
-  LogOut,
-  User
+  GraduationCap,
+  Users,
+  BarChart3,
+  FileCheck,
+  Database
 } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store'
-import { roleNames } from '@/data/mockData'
 
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
 }
 
-const menuItems = [
-  { id: 'dashboard', label: '总览仪表盘', icon: LayoutDashboard },
-  { id: 'ethics', label: '教师职业信念培养', icon: Heart },
-  { id: 'knowledge', label: '教育教材导向课程匹配', icon: BookOpen },
-  { id: 'ai-assistant', label: 'AI助教', icon: MessageCircle },
-  { id: 'learning-loop', label: '学习全过程闭环', icon: GraduationCap },
-  { id: 'observation', label: '教育见习与评课系统', icon: Video },
-  { id: 'skill-training', label: '教学技能实训平台', icon: Code },
-  { id: 'code-learning', label: '智能编程学习', icon: Sparkles },
-  { id: 'personalization', label: 'AI赋能个性化教育', icon: FolderOpen },
-  { id: 'growth', label: '成长档案中心', icon: Briefcase },
-  { id: 'internship', label: '实习与就业支持', icon: Briefcase },
-  { id: 'settings', label: '系统设置', icon: Settings },
-]
+const menuItemsByRole = {
+  student: [
+    { id: '', label: '总览仪表盘', icon: LayoutDashboard },
+    { id: 'ethics', label: '职业信念培养', icon: Heart },
+    { id: 'knowledge', label: '课程匹配', icon: BookOpen },
+    { id: 'ai-assistant', label: 'AI助教', icon: MessageCircle },
+    { id: 'learning-loop', label: '学习闭环', icon: RefreshCw },
+    { id: 'observation', label: '见习评课', icon: Video },
+    { id: 'skill-training', label: '技能实训', icon: PenTool },
+    { id: 'personalization', label: '个性化教育', icon: Target },
+    { id: 'growth', label: '成长档案', icon: FolderOpen },
+    { id: 'internship', label: '实习就业', icon: Briefcase },
+    { id: 'settings', label: '系统设置', icon: Settings },
+  ],
+  teacher: [
+    { id: '', label: '总览仪表盘', icon: LayoutDashboard },
+    { id: 'observation', label: '课堂观察', icon: Video },
+    { id: 'skill-training', label: '实训指导', icon: PenTool },
+    { id: 'personalization', label: '学生管理', icon: Users },
+    { id: 'growth', label: '成长评估', icon: FileCheck },
+    { id: 'ai-assistant', label: 'AI助教', icon: MessageCircle },
+    { id: 'knowledge', label: '课程管理', icon: BookOpen },
+    { id: 'ethics', label: '师德评估', icon: Heart },
+    { id: 'settings', label: '系统设置', icon: Settings },
+  ],
+  admin: [
+    { id: '', label: '总览仪表盘', icon: LayoutDashboard },
+    { id: 'personalization', label: '用户管理', icon: Users },
+    { id: 'knowledge', label: '课程管理', icon: BookOpen },
+    { id: 'growth', label: '数据统计', icon: BarChart3 },
+    { id: 'skill-training', label: '实训管理', icon: PenTool },
+    { id: 'ethics', label: '师德考核', icon: Heart },
+    { id: 'observation', label: '评估管理', icon: FileCheck },
+    { id: 'internship', label: '实习管理', icon: Briefcase },
+    { id: 'settings', label: '系统配置', icon: Database },
+  ],
+}
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const { user, logout } = useAppStore()
-  const [activeItem, setActiveItem] = useState('dashboard')
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { user } = useAppStore()
+
+  const activeItem = location.pathname === '/' ? '' : location.pathname.split('/')[1] || ''
+  const menuItems = user ? menuItemsByRole[user.role as keyof typeof menuItemsByRole] || menuItemsByRole.student : menuItemsByRole.student
 
   return (
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 64 : 256 }}
-      className="h-screen bg-surface border-r border-border flex flex-col relative"
+      animate={{ width: collapsed ? 64 : 240 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className="bg-surface border-r border-border h-screen flex flex-col fixed left-0 top-0 z-50"
     >
-      <div className="p-4 border-b border-border flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-bold text-lg">T</span>
-        </div>
-        <AnimatePresence>
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="overflow-hidden"
+              className="flex items-center gap-3"
             >
-              <h1 className="font-bold text-text-primary text-lg">Thinks行世教育</h1>
-              <p className="text-xs text-text-tertiary">AI智联体</p>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-text-primary text-sm">Thinks行世教育</h1>
+                <p className="text-xs text-text-tertiary">{user?.role === 'student' ? '师范生端' : user?.role === 'teacher' ? '教师端' : '管理端'}</p>
+              </div>
             </motion.div>
+          )}
+          {collapsed && (
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto">
+              <GraduationCap className="w-5 h-5 text-white" />
+            </div>
           )}
         </AnimatePresence>
       </div>
 
-      {user && (
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-light to-secondary-light flex items-center justify-center flex-shrink-0">
-              <User className="w-5 h-5 text-white" />
+      <div className="flex-1 py-4 overflow-y-auto">
+        <nav className="space-y-1 px-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeItem === item.id
+            return (
+              <motion.button
+                key={item.id}
+                onClick={() => navigate(`/${item.id}`)}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-text-secondary hover:bg-surface-tertiary hover:text-text-primary'
+                }`}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : ''}`} />
+                <AnimatePresence mode="wait">
+                  {!collapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="font-medium text-sm whitespace-nowrap overflow-hidden"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            )
+          })}
+        </nav>
+      </div>
+
+      <div className="p-3 border-t border-border">
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-center py-2 text-text-secondary hover:text-text-primary hover:bg-surface-tertiary rounded-xl transition-all"
+        >
+          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+        </button>
+        {!collapsed && user && (
+          <div className="mt-3 p-3 bg-surface-tertiary rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-semibold">
+                {user.name.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-text-primary truncate">{user.name}</p>
+                <p className="text-xs text-text-tertiary">{user.role === 'student' ? '师范生' : user.role === 'teacher' ? '指导教师' : '管理员'}</p>
+              </div>
             </div>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <p className="font-medium text-text-primary text-sm">{user.name}</p>
-                  <p className="text-xs text-text-tertiary">{roleNames[user.role]}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
-        </div>
-      )}
-
-      <nav className="flex-1 py-4 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = activeItem === item.id
-          return (
-            <motion.button
-              key={item.id}
-              onClick={() => {
-                setActiveItem(item.id)
-                window.location.href = `/${item.id}`
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors relative group ${
-                isActive ? 'text-primary bg-primary/5' : 'text-text-secondary hover:bg-surface-tertiary hover:text-text-primary'
-              }`}
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="activeIndicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r"
-                />
-              )}
-              <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary' : ''}`} />
-              <AnimatePresence>
-                {!collapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-sm font-medium overflow-hidden"
-                  >
-                    {item.label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              {!collapsed && (
-                <span className="ml-auto text-xs text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity">
-                  →
-                </span>
-              )}
-            </motion.button>
-          )
-        })}
-      </nav>
-
-      {user && (
-        <div className="p-4 border-t border-border">
-          <button
-            onClick={logout}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-text-secondary hover:text-danger hover:bg-danger/5 transition-colors ${collapsed ? 'justify-center' : ''}`}
-          >
-            <LogOut className="w-5 h-5" />
-            {!collapsed && <span className="text-sm font-medium">退出登录</span>}
-          </button>
-        </div>
-      )}
-
-      <button
-        onClick={onToggle}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center text-text-secondary hover:text-primary hover:border-primary transition-colors z-10"
-      >
-        {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-      </button>
+        )}
+      </div>
     </motion.aside>
   )
 }

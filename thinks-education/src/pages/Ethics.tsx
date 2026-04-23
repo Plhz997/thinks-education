@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Heart, FileText, BookOpen, CheckCircle, ChevronRight, Send, History, Star, AlertCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Heart, FileText, CheckCircle, Send, History, Star } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { mockEthicsScenarios } from '@/data/mockData'
 
@@ -13,8 +13,8 @@ const categoryLabels: Record<string, string> = {
 }
 
 const categoryColors: Record<string, string> = {
-  gift: 'bg-danger/10 text-danger',
-  conflict: 'bg-warning/10 text-warning',
+  gift: 'bg-warning/10 text-warning',
+  conflict: 'bg-danger/10 text-danger',
   fairness: 'bg-info/10 text-info',
   'special-care': 'bg-accent/10 text-accent',
   professional: 'bg-primary/10 text-primary'
@@ -22,294 +22,353 @@ const categoryColors: Record<string, string> = {
 
 export function Ethics() {
   const { addEthicsResponse, addGrowthRecord, ethicsResponses } = useAppStore()
-  const [selectedScenario, setSelectedScenario] = useState(mockEthicsScenarios[0])
-  const [userResponse, setUserResponse] = useState('')
+  const [activeTab, setActiveTab] = useState<'scenarios' | 'history' | 'report'>('scenarios')
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null)
+  const [userAnswer, setUserAnswer] = useState('')
   const [showEvaluation, setShowEvaluation] = useState(false)
-  const [evaluationResult, setEvaluationResult] = useState<{
+  const [evaluation, setEvaluation] = useState<{
     educationIdeal: number
     educationFairness: number
     careStudents: number
-    professionalEthics: number
-    report: string
+    professionalDiscipline: number
   } | null>(null)
-  const [activeTab, setActiveTab] = useState<'training' | 'history'>('training')
 
-  const handleSubmitResponse = () => {
-    if (!userResponse.trim()) return
-
+  const handleSubmitAnswer = () => {
+    if (!selectedScenario || !userAnswer.trim()) return
+    
     const mockEvaluation = {
       educationIdeal: Math.floor(Math.random() * 30) + 70,
       educationFairness: Math.floor(Math.random() * 30) + 70,
       careStudents: Math.floor(Math.random() * 30) + 70,
-      professionalEthics: Math.floor(Math.random() * 30) + 70,
-      report: `您的回答展现了良好的教育理念。在教育理想方面，您表现出对教育事业的热爱和追求；在教育公平方面，您考虑到了每个学生的平等权利；在关爱学生方面，您体现出对学生的关怀；在专业自律方面，您展现了良好的职业操守。建议您继续加强教育理论学习，不断提升自己的专业素养。`
+      professionalDiscipline: Math.floor(Math.random() * 30) + 70
     }
-
-    setEvaluationResult(mockEvaluation)
+    
+    setEvaluation(mockEvaluation)
     setShowEvaluation(true)
     
     addEthicsResponse({
-      scenarioId: selectedScenario.id,
+      scenarioId: selectedScenario,
       userId: 'u1',
-      response: userResponse,
-      evaluation: {
-        educationIdeal: mockEvaluation.educationIdeal,
-        educationFairness: mockEvaluation.educationFairness,
-        careStudents: mockEvaluation.careStudents,
-        professionalEthics: mockEvaluation.professionalEthics
-      },
-      report: mockEvaluation.report
+      answer: userAnswer,
+      evaluation: mockEvaluation
     })
-
+    
     addGrowthRecord({
       type: 'ethics',
-      title: `师德情境训练 - ${selectedScenario.title}`,
-      description: `完成师德情境训练，获得综合评价`,
+      title: '师德情境训练完成',
+      description: `完成了「${mockEthicsScenarios.find(s => s.id === selectedScenario)?.title}」情境训练`,
       timestamp: new Date().toISOString()
     })
   }
 
-  const metrics = evaluationResult ? [
-    { name: '教育理想', score: evaluationResult.educationIdeal, icon: Star },
-    { name: '教育公平', score: evaluationResult.educationFairness, icon: Star },
-    { name: '关爱学生', score: evaluationResult.careStudents, icon: Star },
-    { name: '专业自律', score: evaluationResult.professionalEthics, icon: Star },
-  ] : []
-
-  const avgScore = evaluationResult 
-    ? Math.round((evaluationResult.educationIdeal + evaluationResult.educationFairness + evaluationResult.careStudents + evaluationResult.professionalEthics) / 4)
-    : 0
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">教师职业信念培养</h1>
-          <p className="text-text-secondary mt-1">基于"四有好老师"标准，进行师德师风与职业信念培养</p>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-warning/10 to-primary/10 rounded-2xl p-6 border border-warning/20"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-warning to-amber-400 flex items-center justify-center">
+            <Heart className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-text-primary">教师职业信念培养</h1>
+            <p className="text-text-secondary text-sm">践行"四有好老师"标准，培养高尚师德情操</p>
+          </div>
         </div>
-        <div className="flex gap-2">
-          {['training', 'history'].map((tab) => (
+      </motion.div>
+
+      <div className="flex gap-2 p-1 bg-surface rounded-xl border border-border w-fit">
+        {[
+          { id: 'scenarios', label: '情境训练', icon: Heart },
+          { id: 'history', label: '训练记录', icon: History },
+          { id: 'report', label: '伦理报告', icon: FileText },
+        ].map((tab) => {
+          const Icon = tab.icon
+          return (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab as 'training' | 'history')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === tab
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id as typeof activeTab)
+                setSelectedScenario(null)
+                setShowEvaluation(false)
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                activeTab === tab.id
                   ? 'bg-primary text-white'
-                  : 'bg-surface border border-border text-text-secondary hover:border-primary/50'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-tertiary'
               }`}
             >
-              {tab === 'training' ? '情境训练' : '历史记录'}
+              <Icon className="w-4 h-4" />
+              <span className="text-sm font-medium">{tab.label}</span>
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
 
-      {activeTab === 'training' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <AnimatePresence mode="wait">
+        {activeTab === 'scenarios' && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1"
+            key="scenarios"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           >
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <h2 className="font-semibold text-text-primary">选择训练场景</h2>
-              </div>
-              <div className="space-y-3">
-                {mockEthicsScenarios.map((scenario) => (
-                  <button
-                    key={scenario.id}
-                    onClick={() => {
-                      setSelectedScenario(scenario)
-                      setUserResponse('')
-                      setShowEvaluation(false)
-                      setEvaluationResult(null)
-                    }}
-                    className={`w-full p-4 rounded-xl border text-left transition-all ${
-                      selectedScenario.id === scenario.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50 hover:bg-surface-tertiary'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[scenario.category]}`}>
-                            {categoryLabels[scenario.category]}
-                          </span>
-                          <div className="flex gap-0.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star key={i} className={`w-3 h-3 ${i < scenario.difficulty ? 'text-warning fill-warning' : 'text-border'}`} />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="font-medium text-text-primary">{scenario.title}</p>
-                      </div>
-                      <ChevronRight className={`w-5 h-5 ${selectedScenario.id === scenario.id ? 'text-primary' : 'text-text-tertiary'}`} />
+            <div className="lg:col-span-1 space-y-3">
+              <h3 className="font-semibold text-text-primary">选择训练情境</h3>
+              {mockEthicsScenarios.map((scenario) => (
+                <motion.button
+                  key={scenario.id}
+                  onClick={() => {
+                    setSelectedScenario(scenario.id)
+                    setShowEvaluation(false)
+                    setUserAnswer('')
+                  }}
+                  whileHover={{ x: 4 }}
+                  className={`w-full text-left p-4 rounded-xl border transition-all ${
+                    selectedScenario === scenario.id
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[scenario.category]}`}>
+                      {categoryLabels[scenario.category]}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: scenario.difficulty }).map((_, i) => (
+                        <Star key={i} className="w-3 h-3 text-warning fill-warning" />
+                      ))}
                     </div>
-                  </button>
+                  </div>
+                  <p className="font-medium text-text-primary mb-1">{scenario.title}</p>
+                  <p className="text-sm text-text-secondary line-clamp-2">{scenario.description}</p>
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="lg:col-span-2">
+              {selectedScenario ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-surface rounded-xl border border-border p-6"
+                >
+                  {!showEvaluation ? (
+                    <>
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[mockEthicsScenarios.find(s => s.id === selectedScenario)!.category]}`}>
+                            {categoryLabels[mockEthicsScenarios.find(s => s.id === selectedScenario)!.category]}
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-text-primary mb-3">
+                          {mockEthicsScenarios.find(s => s.id === selectedScenario)!.title}
+                        </h3>
+                        <p className="text-text-secondary">
+                          {mockEthicsScenarios.find(s => s.id === selectedScenario)!.description}
+                        </p>
+                      </div>
+
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-text-secondary mb-2">请描述你的处理思路</label>
+                        <textarea
+                          value={userAnswer}
+                          onChange={(e) => setUserAnswer(e.target.value)}
+                          placeholder="请详细描述您在该情境下的处理思路和具体做法..."
+                          className="w-full h-32 p-4 rounded-xl bg-surface-tertiary border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                        />
+                      </div>
+
+                      <div className="bg-secondary/5 rounded-xl p-4 mb-6">
+                        <h4 className="text-sm font-medium text-secondary mb-2">思考提示</h4>
+                        <ul className="text-sm text-text-secondary space-y-1">
+                          <li>• 如何体现教育公平原则？</li>
+                          <li>• 如何兼顾学生的个体差异？</li>
+                          <li>• 如何维护良好的师生关系？</li>
+                          <li>• 如何保持专业自律精神？</li>
+                        </ul>
+                      </div>
+
+                      <motion.button
+                        onClick={handleSubmitAnswer}
+                        disabled={!userAnswer.trim()}
+                        whileHover={userAnswer.trim() ? { scale: 1.02 } : {}}
+                        whileTap={userAnswer.trim() ? { scale: 0.98 } : {}}
+                        className={`w-full h-12 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
+                          userAnswer.trim()
+                            ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-lg shadow-primary/25'
+                            : 'bg-surface-tertiary text-text-tertiary cursor-not-allowed'
+                        }`}
+                      >
+                        <Send className="w-5 h-5" />
+                        提交回答并获取评价
+                      </motion.button>
+                    </>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="space-y-6"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <CheckCircle className="w-5 h-5 text-accent" />
+                        <span className="font-semibold text-text-primary">评价结果已生成</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { label: '教育理想', value: evaluation!.educationIdeal, color: 'from-primary to-primary-light' },
+                          { label: '教育公平', value: evaluation!.educationFairness, color: 'from-secondary to-secondary-light' },
+                          { label: '关爱学生', value: evaluation!.careStudents, color: 'from-accent to-accent-light' },
+                          { label: '专业自律', value: evaluation!.professionalDiscipline, color: 'from-warning to-amber-400' },
+                        ].map((item) => (
+                          <div key={item.label} className="bg-surface-tertiary rounded-xl p-4">
+                            <p className="text-sm text-text-secondary mb-2">{item.label}</p>
+                            <div className="flex items-center gap-3">
+                              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center`}>
+                                <span className="text-2xl font-bold text-white">{item.value}</span>
+                              </div>
+                              <div className="flex-1">
+                                <div className="h-2 bg-surface rounded-full overflow-hidden mb-1">
+                                  <div className={`h-full bg-gradient-to-r ${item.color}`} style={{ width: `${item.value}%` }} />
+                                </div>
+                                <p className="text-xs text-text-tertiary">{item.value >= 85 ? '优秀' : item.value >= 70 ? '良好' : '需改进'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-primary/5 rounded-xl p-4">
+                        <h4 className="font-semibold text-primary mb-2">伦理决策报告摘要</h4>
+                        <p className="text-sm text-text-secondary">
+                          您的回答充分体现了作为一名未来教师应有的职业素养。在教育理想维度表现突出，展现了对教育事业的热爱和追求。建议在关爱学生方面进一步加强沟通技巧的学习，以更好地理解学生需求。整体评价：良好
+                        </p>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            setShowEvaluation(false)
+                            setSelectedScenario(null)
+                          }}
+                          className="flex-1 h-12 border border-border rounded-xl font-medium hover:bg-surface-tertiary transition-all"
+                        >
+                          返回选择
+                        </button>
+                        <button className="flex-1 h-12 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-all">
+                          查看详细报告
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              ) : (
+                <div className="bg-surface rounded-xl border border-border p-12 text-center">
+                  <Heart className="w-16 h-16 text-warning/30 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-text-primary mb-2">选择一个情境开始训练</h3>
+                  <p className="text-text-secondary">从左侧列表中选择一个师德情境进行模拟训练</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'history' && (
+          <motion.div
+            key="history"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="bg-surface rounded-xl border border-border p-6"
+          >
+            <h3 className="font-semibold text-text-primary mb-4">训练历史记录</h3>
+            {ethicsResponses.length > 0 ? (
+              <div className="space-y-3">
+                {ethicsResponses.map((response) => (
+                  <div key={response.id} className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-text-primary">
+                        {mockEthicsScenarios.find(s => s.id === response.scenarioId)?.title}
+                      </p>
+                      <p className="text-sm text-text-tertiary">
+                        {new Date(response.timestamp).toLocaleString('zh-CN')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-primary">
+                        {Math.round((response.evaluation.educationIdeal + response.evaluation.educationFairness + response.evaluation.careStudents + response.evaluation.professionalDiscipline) / 4)}
+                      </p>
+                      <p className="text-xs text-text-tertiary">综合评分</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <History className="w-16 h-16 text-text-tertiary/30 mx-auto mb-4" />
+                <p className="text-text-secondary">暂无训练记录</p>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === 'report' && (
+          <motion.div
+            key="report"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="bg-surface rounded-xl border border-border p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-text-primary">伦理决策报告</h3>
+              <button className="flex items-center gap-2 text-primary hover:text-primary-dark transition-colors">
+                <FileText className="w-4 h-4" />
+                <span className="text-sm">导出报告</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+              {[
+                { label: '完成训练次数', value: ethicsResponses.length || 3, unit: '次' },
+                { label: '平均教育理想评分', value: 85, unit: '分' },
+                { label: '平均教育公平评分', value: 82, unit: '分' },
+                { label: '师德档案完整性', value: 78, unit: '%' },
+              ].map((stat) => (
+                <div key={stat.label} className="bg-surface-tertiary rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-primary mb-1">{stat.value}{stat.unit}</p>
+                  <p className="text-sm text-text-secondary">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-6">
+              <h4 className="font-semibold text-text-primary mb-4">师德发展趋势</h4>
+              <div className="flex items-end gap-4 h-32">
+                {[65, 72, 78, 82, 85].map((value, index) => (
+                  <div key={index} className="flex-1">
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${value}%` }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="bg-gradient-to-t from-primary to-secondary rounded-t-lg w-full"
+                      style={{ height: `${value}%` }}
+                    />
+                    <p className="text-xs text-text-tertiary text-center mt-2">第{index + 1}月</p>
+                  </div>
                 ))}
               </div>
             </div>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            <div className="bg-surface rounded-xl border border-border p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-10 h-10 rounded-lg ${categoryColors[selectedScenario.category]} flex items-center justify-center`}>
-                  <Heart className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-text-primary">{selectedScenario.title}</h3>
-                  <span className={`text-sm ${categoryColors[selectedScenario.category]}`}>
-                    {categoryLabels[selectedScenario.category]}
-                  </span>
-                </div>
-              </div>
-              <div className="p-4 bg-surface-tertiary rounded-xl">
-                <p className="text-text-primary leading-relaxed">{selectedScenario.description}</p>
-              </div>
-            </div>
-
-            {!showEvaluation ? (
-              <div className="bg-surface rounded-xl border border-border p-6">
-                <h3 className="font-semibold text-text-primary mb-4">请输入您的处理思路</h3>
-                <textarea
-                  value={userResponse}
-                  onChange={(e) => setUserResponse(e.target.value)}
-                  placeholder="请详细描述您会如何处理这个情境..."
-                  className="w-full h-40 px-4 py-3 bg-surface-tertiary border border-border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-sm text-text-tertiary">
-                    {userResponse.length} 字
-                  </p>
-                  <button
-                    onClick={handleSubmitResponse}
-                    disabled={!userResponse.trim()}
-                    className="px-6 py-2 bg-gradient-to-r from-primary to-primary-light text-white font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    <Send className="w-4 h-4" />
-                    提交
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <div className="bg-surface rounded-xl border border-border p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <h3 className="font-semibold text-text-primary">评价结果</h3>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {metrics.map((metric) => (
-                      <div key={metric.name} className="p-4 bg-surface-tertiary rounded-xl text-center">
-                        <metric.icon className="w-6 h-6 text-primary mx-auto mb-2" />
-                        <p className="text-2xl font-bold text-text-primary">{metric.score}</p>
-                        <p className="text-sm text-text-secondary">{metric.name}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex items-center justify-center">
-                    <div className="text-center">
-                      <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        {avgScore}
-                      </p>
-                      <p className="text-text-secondary">综合评分</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-surface rounded-xl border border-border p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-text-primary">伦理决策报告</h3>
-                  </div>
-                  <div className="p-4 bg-surface-tertiary rounded-xl">
-                    <p className="text-text-primary leading-relaxed">{evaluationResult?.report}</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => {
-                      setUserResponse('')
-                      setShowEvaluation(false)
-                      setEvaluationResult(null)
-                    }}
-                    className="px-6 py-2 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors"
-                  >
-                    继续训练
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        </div>
-      ) : (
-        <div className="bg-surface rounded-xl border border-border p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <History className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-text-primary">训练历史记录</h2>
-          </div>
-          
-          {ethicsResponses.length > 0 ? (
-            <div className="space-y-4">
-              {ethicsResponses.map((response) => {
-                const scenario = mockEthicsScenarios.find(s => s.id === response.scenarioId)
-                const avgScore = Math.round(
-                  (response.evaluation.educationIdeal + 
-                   response.evaluation.educationFairness + 
-                   response.evaluation.careStudents + 
-                   response.evaluation.professionalEthics) / 4
-                )
-                return (
-                  <div key={response.id} className="p-4 bg-surface-tertiary rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Heart className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-text-primary">{scenario?.title}</p>
-                          <p className="text-sm text-text-tertiary">
-                            {new Date(response.timestamp).toLocaleDateString('zh-CN')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-primary">{avgScore}</p>
-                        <p className="text-xs text-text-tertiary">综合评分</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-text-secondary line-clamp-2">{response.response}</p>
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <AlertCircle className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
-              <p className="text-text-secondary">暂无训练记录</p>
-              <button
-                onClick={() => setActiveTab('training')}
-                className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
-              >
-                开始训练
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   )
 }

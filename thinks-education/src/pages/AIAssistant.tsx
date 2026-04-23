@@ -1,226 +1,285 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  MessageCircle, 
-  Send, 
-  Mic, 
-  Image, 
-  FileText, 
-  Sparkles,
-  BookOpen,
-  Layout,
-  Users,
-  FileEdit,
-  CheckSquare,
-  Code,
-  HelpCircle,
-  Bot,
-  Clock
-} from 'lucide-react'
+import { MessageCircle, Send, Mic, Image, FileText, Sparkles, Clock, Bot, ChevronDown, Target, Users, Lightbulb } from 'lucide-react'
 import { useAppStore } from '@/store'
 
 const quickQuestions = [
-  { id: 'theory', label: '教育学理论', icon: BookOpen, color: 'bg-primary' },
-  { id: 'design', label: '课程设计', icon: Layout, color: 'bg-secondary' },
-  { id: 'management', label: '课堂管理', icon: Users, color: 'bg-accent' },
-  { id: 'lesson-plan', label: '教案优化', icon: FileEdit, color: 'bg-warning' },
-  { id: 'grading', label: '作业批改', icon: CheckSquare, color: 'bg-info' },
-  { id: 'code', label: '代码纠错', icon: Code, color: 'bg-danger' },
+  { id: 'q1', label: '什么是建构主义学习理论？', type: 'theory' },
+  { id: 'q2', label: '如何设计一节探究式数学课？', type: 'design' },
+  { id: 'q3', label: '课堂上学生注意力不集中怎么办？', type: 'management' },
+  { id: 'q4', label: '如何优化我的教案设计？', type: 'design' },
 ]
 
-const mockResponses: Record<string, string> = {
-  theory: '建构主义学习理论强调学习者在原有知识经验基础上主动构建新知识。核心观点包括：1）学习是主动的建构过程；2）知识是个人经验的合理化；3）学习具有社会性；4）学习应在真实情境中进行。在教学设计中应用：项目式学习、探究式教学、合作学习等。',
-  design: '设计一节数学探究课的建议：\n\n1. **教学目标**：明确知识目标、能力目标、情感目标\n2. **情境导入**：创设生活情境，激发兴趣\n3. **探究活动**：提供探究材料，引导自主发现\n4. **小组合作**：组织小组讨论，促进思维碰撞\n5. **成果展示**：鼓励分享交流，培养表达能力\n6. **总结提升**：归纳核心知识点，拓展延伸',
-  management: '课堂管理策略：\n\n1. **建立规则**：开学初共同制定课堂规则\n2. **积极强化**：及时表扬正向行为\n3. **眼神交流**：用眼神管理课堂节奏\n4. **灵活分组**：根据学习任务调整分组方式\n5. **时间管理**：合理分配各环节时间\n6. **应对冲突**：冷静处理，公平公正',
-  'lesson-plan': '教案优化建议：\n\n1. **教学目标具体化**：使用可观察、可测量的动词\n2. **教学流程清晰化**：环节衔接自然流畅\n3. **活动设计多样化**：结合讲授、讨论、实践\n4. **评价方式多元化**：过程性评价与终结性评价结合\n5. **技术整合恰当化**：选择合适的教学工具\n6. **反思预留**：课后反思与改进空间',
-  grading: '作业批改反馈建议：\n\n1. **及时性**：及时批改，及时反馈\n2. **针对性**：指出具体问题，提供改进建议\n3. **鼓励性**：肯定优点，激发学习动力\n4. **分层反馈**：根据学生水平提供差异化指导\n5. **范例展示**：分享优秀作业，树立标杆',
-  code: '代码纠错思路：\n\n1. **语法检查**：检查拼写错误、括号匹配\n2. **逻辑分析**：梳理执行流程，找出逻辑漏洞\n3. **调试技巧**：添加断点，逐步调试\n4. **代码规范**：遵循PEP8等编码规范\n5. **优化建议**：改进算法复杂度、代码可读性',
+const mockAnswers: Record<string, { answer: string; reasoning: string; type: string }> = {
+  q1: {
+    answer: '建构主义学习理论认为，学习是学习者主动建构知识的过程，而不是被动接受信息。学习者基于已有的知识和经验，通过与环境的互动来构建新的理解。核心观点包括：1) 知识不是客观存在的，而是学习者建构的；2) 学习是主动的过程；3) 社会性互动对学习至关重要；4) 学习应在真实情境中进行。',
+    reasoning: '分析用户问题后，首先识别出这是一个教育学理论问题。系统从教育理论知识库中检索建构主义的核心概念，包括其哲学基础、主要代表人物（如皮亚杰、维果茨基）以及在教学实践中的应用。生成回答时，采用结构化方式呈现核心观点，确保准确性和清晰度。',
+    type: 'theory'
+  },
+  q2: {
+    answer: '设计探究式数学课的步骤：1) 确定探究主题（如"如何测量不规则图形的面积"）；2) 创设问题情境，激发学生兴趣；3) 提供探究材料和工具；4) 引导学生提出假设并进行实验；5) 组织小组讨论和分享；6) 总结归纳，形成结论；7) 拓展应用，联系实际生活。关键是让学生经历"提出问题-猜想假设-实验验证-得出结论"的完整过程。',
+    reasoning: '用户需要课程设计建议，系统首先分析数学学科特点和探究式教学的核心要素。结合数学课程标准要求，生成结构化的设计步骤，同时考虑学生认知水平和课堂时间安排。回答中包含具体示例，帮助用户更好地理解和应用。',
+    type: 'design'
+  },
+  q3: {
+    answer: '处理学生注意力不集中的策略：1) 采用多样化的教学方法（如小组活动、多媒体展示）；2) 设计互动环节，增加学生参与；3) 使用提问技巧，保持学生思维活跃；4) 合理安排课堂节奏，避免单调；5) 关注个别学生，给予适当关注；6) 建立课堂规则，明确行为期望。同时要分析学生分心的原因（如内容难度、兴趣点、身体因素等），采取针对性措施。',
+    reasoning: '识别这是课堂管理问题后，系统从多个维度分析解决方案。考虑到不同年龄段学生的特点，提供多层次的策略建议。回答结构清晰，既有具体方法，又有背后的原理分析，帮助用户理解策略的适用场景和实施要点。',
+    type: 'management'
+  },
+  q4: {
+    answer: '优化教案设计的建议：1) 明确教学目标，确保目标可测量；2) 分析学生学情，设计差异化活动；3) 优化教学流程，合理分配时间；4) 增加互动环节，提高参与度；5) 设计有效的评价方式；6) 准备备选方案，应对突发情况；7) 课后反思，持续改进。建议参考优秀教案模板，结合学科特点和学生实际情况进行调整。',
+    reasoning: '针对教案优化需求，系统从教学设计的核心要素入手。结合教育目标分类理论（如布鲁姆分类法）和课程设计模型（如ADDIE模型），提供系统化的优化建议。回答注重实用性和可操作性，帮助用户快速应用到实际教学中。',
+    type: 'design'
+  }
 }
 
 export function AIAssistant() {
-  const { addQAMessage, addLearningRecord, qaMessages } = useAppStore()
+  const { addQAMessage, addLearningRecord } = useAppStore()
   const [inputMessage, setInputMessage] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
+  const [messages, setMessages] = useState<{ id: string; role: 'user' | 'assistant'; content: string; type?: string; reasoning?: string }[]>([])
+  const [showReasoning, setShowReasoning] = useState(false)
+  const [activeQuickAction, setActiveQuickAction] = useState<string | null>(null)
 
-  const handleSend = async (content: string, type?: string) => {
-    if (!content.trim()) return
+  const handleSend = () => {
+    if (!inputMessage.trim()) return
 
-    setIsTyping(true)
-    addQAMessage({ content, sender: 'user', timestamp: new Date().toISOString(), type: type as any })
-    
-    addLearningRecord({
-      type: 'qa',
-      title: `AI助教问答 - ${content.slice(0, 20)}${content.length > 20 ? '...' : ''}`,
-      timestamp: new Date().toISOString(),
-      duration: 5
-    })
+    const userMessage = {
+      id: `msg-${Date.now()}`,
+      role: 'user' as const,
+      content: inputMessage
+    }
 
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    const responseContent = type ? mockResponses[type] : '感谢您的提问！我来为您分析解答。根据您的问题，以下是我的建议：\n\n1. 首先分析问题的核心要点\n2. 结合教育理论进行思考\n3. 提供具体的实践策略\n4. 给出可操作的步骤\n\n希望这些内容对您有帮助！'
-    
-    addQAMessage({ content: responseContent, sender: 'ai', timestamp: new Date().toISOString(), type: type as any })
-    setIsTyping(false)
+    setMessages(prev => [...prev, userMessage])
     setInputMessage('')
+
+    setTimeout(() => {
+      const mockAnswer = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant' as const,
+        content: '这是一个很好的问题！根据您的提问，我为您整理了以下内容...\n\n作为一名师范生，掌握这些教育教学知识对于您未来的教学实践非常重要。建议您结合具体的教学情境进行思考和应用。',
+        reasoning: '分析用户问题意图，从教育知识库中检索相关内容，整合多个权威来源的信息，确保回答的准确性和全面性。同时考虑到用户是师范生的身份，提供更加贴近教学实践的建议。',
+        type: 'general'
+      }
+      setMessages(prev => [...prev, mockAnswer])
+      setShowReasoning(true)
+
+      addQAMessage({
+        role: 'user',
+        content: inputMessage,
+        timestamp: new Date().toISOString()
+      })
+
+      addLearningRecord({
+        type: 'qa',
+        title: `AI助教问答 - ${inputMessage.substring(0, 30)}${inputMessage.length > 30 ? '...' : ''}`,
+        timestamp: new Date().toISOString(),
+        duration: 5
+      })
+    }, 1000)
   }
 
-  const quickActions = [
-    { id: 'questions', label: '生成题目', icon: HelpCircle },
-    { id: 'lesson-plan', label: '生成教案初稿', icon: FileEdit },
-    { id: 'explain', label: '解释知识点', icon: BookOpen },
-    { id: 'review', label: '生成评课建议', icon: CheckSquare },
-  ]
+  const handleQuickQuestion = (questionId: string) => {
+    setActiveQuickAction(questionId)
+    
+    const userMessage = {
+      id: `msg-${Date.now()}`,
+      role: 'user' as const,
+      content: quickQuestions.find(q => q.id === questionId)?.label || ''
+    }
+
+    setMessages(prev => [...prev, userMessage])
+
+    setTimeout(() => {
+      const answerData = mockAnswers[questionId]
+      if (answerData) {
+        const assistantMessage = {
+          id: `msg-${Date.now()}`,
+          role: 'assistant' as const,
+          content: answerData.answer,
+          reasoning: answerData.reasoning,
+          type: answerData.type
+        }
+        setMessages(prev => [...prev, assistantMessage])
+        setShowReasoning(true)
+      }
+      setActiveQuickAction(null)
+    }, 1000)
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">AI助教</h1>
-          <p className="text-text-secondary mt-1">为师范生提供教育学、学科知识、教案、作业、问答支持</p>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-accent/10 to-primary/10 rounded-2xl p-6 border border-accent/20"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+            <MessageCircle className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-text-primary">AI 助教</h1>
+            <p className="text-text-secondary text-sm">为师范生提供教育学、学科知识、教案、作业、问答支持</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-lg">
-          <Sparkles className="w-4 h-4" />
-          <span className="text-sm font-medium">AI 已减轻教师重复工作约 60%</span>
-        </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {quickActions.map((action, index) => (
-          <motion.button
-            key={action.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            onClick={() => handleSend(`请帮我${action.label}`, action.id === 'lesson-plan' ? 'lesson-plan' : undefined)}
-            className="p-4 bg-surface rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                <action.icon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-              </div>
-              <span className="font-medium text-text-primary">{action.label}</span>
-            </div>
-          </motion.button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-1"
-        >
-          <div className="bg-surface rounded-xl border border-border p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="font-semibold text-text-primary">典型问题</h2>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1 space-y-4">
+          <div className="bg-surface rounded-xl border border-border p-4">
+            <h3 className="font-semibold text-text-primary mb-3">快捷问题</h3>
             <div className="space-y-2">
-              {quickQuestions.map((question) => {
-                const Icon = question.icon
+              {quickQuestions.map((question) => (
+                <motion.button
+                  key={question.id}
+                  onClick={() => handleQuickQuestion(question.id)}
+                  whileHover={{ x: 4 }}
+                  disabled={activeQuickAction !== null}
+                  className={`w-full text-left p-3 rounded-lg transition-all ${
+                    activeQuickAction === question.id
+                      ? 'bg-primary/10 border border-primary/30'
+                      : 'hover:bg-surface-tertiary border border-transparent'
+                  } ${activeQuickAction !== null && activeQuickAction !== question.id ? 'opacity-50' : ''}`}
+                >
+                  <p className="text-sm text-text-primary line-clamp-2">{question.label}</p>
+                  <span className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full ${
+                    question.type === 'theory' ? 'bg-primary/10 text-primary' :
+                    question.type === 'design' ? 'bg-secondary/10 text-secondary' :
+                    'bg-accent/10 text-accent'
+                  }`}>
+                    {question.type === 'theory' ? '理论' : question.type === 'design' ? '设计' : '管理'}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-surface rounded-xl border border-border p-4">
+            <h3 className="font-semibold text-text-primary mb-3">快捷功能</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: '生成题目', icon: Target, color: 'bg-primary' },
+                { label: '生成教案', icon: FileText, color: 'bg-secondary' },
+                { label: '解释知识点', icon: Lightbulb, color: 'bg-accent' },
+                { label: '评课建议', icon: Users, color: 'bg-warning' },
+              ].map((action) => {
+                const Icon = action.icon
                 return (
                   <button
-                    key={question.id}
-                    onClick={() => handleSend(`请讲解${question.label}相关内容`, question.id)}
-                    className="w-full p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-left"
+                    key={action.label}
+                    className="p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center gap-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg ${question.color}/10 flex items-center justify-center`}>
-                        <Icon className={`w-4 h-4 ${question.color.replace('bg-', 'text-')}`} />
-                      </div>
-                      <span className="text-sm text-text-primary">{question.label}</span>
+                    <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center`}>
+                      <Icon className="w-5 h-5 text-white" />
                     </div>
+                    <span className="text-xs text-text-secondary">{action.label}</span>
                   </button>
                 )
               })}
             </div>
           </div>
 
-          <div className="mt-6 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Bot className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-text-primary">推理过程概览</h3>
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-medium text-text-primary">产品价值</span>
             </div>
-            <div className="space-y-2 text-sm text-text-secondary">
+            <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary" />
-                <span>分析问题意图与上下文</span>
+                <Clock className="w-4 h-4 text-text-tertiary" />
+                <span className="text-text-secondary">平均响应时间 &lt; 3秒</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-secondary" />
-                <span>检索教育知识库匹配</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-accent" />
-                <span>生成结构化回答</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-warning" />
-                <span>优化语言表达与格式</span>
-              </div>
+              <div className="text-text-secondary">支持文本、语音、图片输入</div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-2"
-        >
-          <div className="bg-surface rounded-xl border border-border h-[500px] flex flex-col">
+        <div className="lg:col-span-3">
+          <div className="bg-surface rounded-xl border border-border h-[600px] flex flex-col">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-text-primary">AI 助教</p>
+                <p className="text-xs text-text-tertiary">全天候为您提供专业教育支持</p>
+              </div>
+            </div>
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <AnimatePresence>
-                {qaMessages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-text-tertiary">
-                    <Bot className="w-12 h-12 mb-4" />
-                    <p className="text-lg font-medium">欢迎使用AI助教</p>
-                    <p className="text-sm">我可以帮助您解答教育学问题、设计课程、优化教案等</p>
-                  </div>
-                ) : (
-                  qaMessages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex gap-3 ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.sender === 'user' ? 'bg-primary text-white' : 'bg-surface-tertiary text-primary'
-                      }`}>
-                        {message.sender === 'user' ? (
-                          <MessageCircle className="w-4 h-4" />
-                        ) : (
-                          <Bot className="w-4 h-4" />
-                        )}
-                      </div>
-                      <div className={`max-w-[70%] ${message.sender === 'user' ? 'text-right' : ''}`}>
-                        <div className={`px-4 py-2 rounded-xl ${
-                          message.sender === 'user' 
-                            ? 'bg-primary text-white rounded-tr-sm' 
-                            : 'bg-surface-tertiary text-text-primary rounded-tl-sm'
-                        }`}>
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        </div>
-                        <p className="text-xs text-text-tertiary mt-1">
-                          {new Date(message.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </AnimatePresence>
-              
-              {isTyping && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-surface-tertiary text-primary flex items-center justify-center">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <div className="px-4 py-3 bg-surface-tertiary rounded-xl rounded-tl-sm">
-                    <div className="flex gap-1">
-                      <motion.div className="w-2 h-2 rounded-full bg-text-tertiary" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 0.8 }} />
-                      <motion.div className="w-2 h-2 rounded-full bg-text-tertiary" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }} />
-                      <motion.div className="w-2 h-2 rounded-full bg-text-tertiary" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }} />
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+                  >
+                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${
+                      message.role === 'user'
+                        ? 'bg-primary text-white'
+                        : 'bg-accent/10 text-accent'
+                    }`}>
+                      {message.role === 'user' ? (
+                        <span className="text-sm font-semibold">{message.content.charAt(0)}</span>
+                      ) : (
+                        <Bot className="w-5 h-5" />
+                      )}
                     </div>
+                    <div className={`max-w-[70%] ${message.role === 'user' ? 'text-right' : ''}`}>
+                      <div className={`p-4 rounded-xl ${
+                        message.role === 'user'
+                          ? 'bg-primary text-white rounded-tr-sm'
+                          : 'bg-surface-tertiary text-text-primary rounded-tl-sm'
+                      }`}>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                      {message.role === 'assistant' && message.type && (
+                        <span className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full ${
+                          message.type === 'theory' ? 'bg-primary/10 text-primary' :
+                          message.type === 'design' ? 'bg-secondary/10 text-secondary' :
+                          message.type === 'management' ? 'bg-accent/10 text-accent' :
+                          'bg-info/10 text-info'
+                        }`}>
+                          {message.type === 'theory' ? '教育学理论' : 
+                           message.type === 'design' ? '课程设计' : 
+                           message.type === 'management' ? '课堂管理' : '综合'}
+                        </span>
+                      )}
+                      {message.role === 'assistant' && message.reasoning && showReasoning && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          className="mt-2 bg-primary/5 rounded-xl p-4"
+                        >
+                          <button
+                            onClick={() => setShowReasoning(false)}
+                            className="flex items-center gap-1 text-xs text-primary mb-2"
+                          >
+                            <span>推理过程概览</span>
+                            <ChevronDown className="w-3 h-3" />
+                          </button>
+                          <p className="text-sm text-text-secondary">{message.reasoning}</p>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {messages.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center mb-4">
+                    <MessageCircle className="w-10 h-10 text-accent" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-text-primary mb-2">欢迎使用 AI 助教</h3>
+                  <p className="text-text-secondary mb-4">我可以帮助您解答教育学问题、设计课程、优化教案等</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['教育学理论', '课程设计', '课堂管理', '教案优化'].map((tag) => (
+                      <span key={tag} className="px-3 py-1 bg-surface-tertiary text-text-secondary rounded-full text-sm">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -228,45 +287,42 @@ export function AIAssistant() {
 
             <div className="p-4 border-t border-border">
               <div className="flex items-center gap-3">
-                <div className="flex gap-2">
-                  <button className="p-2 rounded-lg bg-surface-tertiary hover:bg-primary/5 transition-colors">
-                    <Mic className="w-5 h-5 text-text-secondary" />
-                  </button>
-                  <button className="p-2 rounded-lg bg-surface-tertiary hover:bg-primary/5 transition-colors">
-                    <Image className="w-5 h-5 text-text-secondary" />
-                  </button>
-                  <button className="p-2 rounded-lg bg-surface-tertiary hover:bg-primary/5 transition-colors">
-                    <FileText className="w-5 h-5 text-text-secondary" />
-                  </button>
-                </div>
+                <button className="p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all">
+                  <Mic className="w-5 h-5 text-text-secondary" />
+                </button>
+                <button className="p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all">
+                  <Image className="w-5 h-5 text-text-secondary" />
+                </button>
+                <button className="p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all">
+                  <FileText className="w-5 h-5 text-text-secondary" />
+                </button>
                 <div className="flex-1 relative">
                   <input
                     type="text"
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSend(inputMessage)}
-                    placeholder="输入您的问题..."
-                    className="w-full h-10 px-4 rounded-xl bg-surface-tertiary border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    placeholder="输入您的问题，我来帮您解答..."
+                    className="w-full h-12 px-4 rounded-xl bg-surface-tertiary border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 pr-12"
                   />
                 </div>
-                <button
-                  onClick={() => handleSend(inputMessage)}
+                <motion.button
+                  onClick={handleSend}
                   disabled={!inputMessage.trim()}
-                  className="p-2 rounded-lg bg-primary text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={inputMessage.trim() ? { scale: 1.05 } : {}}
+                  whileTap={inputMessage.trim() ? { scale: 0.95 } : {}}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                    inputMessage.trim()
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-tertiary text-text-tertiary cursor-not-allowed'
+                  }`}
                 >
                   <Send className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="flex items-center gap-4 mt-3 text-xs text-text-tertiary">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  平均响应时间 &lt; 3秒
-                </span>
-                <span>支持文本、语音、图片输入</span>
+                </motion.button>
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

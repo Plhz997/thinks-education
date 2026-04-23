@@ -39,16 +39,32 @@ export function Dashboard() {
 
   const pendingTasks = tasks.length > 0 ? tasks.filter(t => t.status !== 'completed') : mockTasks.filter(t => t.status !== 'completed')
   const recentRecords = learningRecords.length > 0 ? learningRecords.slice(0, 5) : mockLearningRecords.slice(0, 5)
-  const userCourses = courses.length > 0 ? courses : mockCourses
+  const userCourses = courses.length > 0 ? courses.filter(c => c.major === user.major || !c.major) : mockCourses.filter(c => c.major === user.major || !c.major)
   
   const totalProgress = userCourses.reduce((acc, c) => acc + c.progress, 0) / userCourses.length
 
-  const quickActions = [
+  const studentQuickActions = [
     { id: 'practice', label: '去试讲', icon: Video, color: 'bg-primary' },
     { id: 'qa', label: '去问答', icon: MessageCircle, color: 'bg-secondary' },
     { id: 'review', label: '去评课', icon: FileText, color: 'bg-accent' },
     { id: 'ethics', label: '师德训练', icon: Heart, color: 'bg-warning' },
   ]
+
+  const teacherQuickActions = [
+    { id: 'observation', label: '课堂观察', icon: Video, color: 'bg-primary' },
+    { id: 'assessment', label: '实训评估', icon: FileText, color: 'bg-secondary' },
+    { id: 'students', label: '学生管理', icon: Target, color: 'bg-accent' },
+    { id: 'qa', label: '答疑辅导', icon: MessageCircle, color: 'bg-success' },
+  ]
+
+  const adminQuickActions = [
+    { id: 'users', label: '用户管理', icon: Target, color: 'bg-primary' },
+    { id: 'courses', label: '课程管理', icon: BookOpen, color: 'bg-secondary' },
+    { id: 'statistics', label: '数据统计', icon: TrendingUp, color: 'bg-accent' },
+    { id: 'system', label: '系统配置', icon: Award, color: 'bg-warning' },
+  ]
+
+  const quickActions = user.role === 'student' ? studentQuickActions : user.role === 'teacher' ? teacherQuickActions : adminQuickActions
 
   const priorityColors: Record<string, string> = {
     high: 'bg-danger/10 text-danger',
@@ -56,27 +72,73 @@ export function Dashboard() {
     low: 'bg-info/10 text-info'
   }
 
-  return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-primary to-primary-light rounded-2xl p-6 text-white"
-      >
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-white/80 text-sm mb-1">欢迎回来，{user.name}</p>
-            <h1 className="text-2xl font-bold mb-2">{majorNames[user.major]}专业</h1>
-            <p className="text-white/80">{user.class} | {user.semester}</p>
-          </div>
-          <div className="flex items-center gap-4">
+  const getWelcomeMessage = () => {
+    if (user.role === 'student') {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-primary to-primary-light rounded-2xl p-6 text-white"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-white/80 text-sm mb-1">欢迎回来，{user.name}</p>
+              <h1 className="text-2xl font-bold mb-2">{majorNames[user.major]}专业</h1>
+              <p className="text-white/80">{user.class} | {user.semester}</p>
+            </div>
             <div className="text-right">
               <p className="text-3xl font-bold">{totalProgress.toFixed(0)}%</p>
               <p className="text-white/80 text-sm">课程完成度</p>
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      )
+    } else if (user.role === 'teacher') {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-accent to-secondary rounded-2xl p-6 text-white"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-white/80 text-sm mb-1">欢迎回来，{user.name}</p>
+              <h1 className="text-2xl font-bold mb-2">指导教师工作台</h1>
+              <p className="text-white/80">{user.school} | {user.department}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold">12</p>
+              <p className="text-white/80 text-sm">指导学生数</p>
+            </div>
+          </div>
+        </motion.div>
+      )
+    } else {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-warning to-warning-dark rounded-2xl p-6 text-white"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-white/80 text-sm mb-1">欢迎回来，{user.name}</p>
+              <h1 className="text-2xl font-bold mb-2">管理员控制台</h1>
+              <p className="text-white/80">{user.school} | 教务处</p>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold">256</p>
+              <p className="text-white/80 text-sm">平台用户数</p>
+            </div>
+          </div>
+        </motion.div>
+      )
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {getWelcomeMessage()}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -173,10 +235,7 @@ export function Dashboard() {
                 <YAxis tick={{ fill: '#94A3B8', fontSize: 10 }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#fff', border: '1px solid #E2E8F0', borderRadius: '8px' }}
-                  formatter={(value) => {
-                    const numValue = Number(value)
-                    return [`${numValue}小时`, '学习时长']
-                  }}
+                  formatter={(value) => [`${Number(value)}小时`, '学习时长']}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="hours" name="学习时长" stroke="#5B21B6" strokeWidth={2} dot={{ r: 4 }} />
