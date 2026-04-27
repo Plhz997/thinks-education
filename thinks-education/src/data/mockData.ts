@@ -267,7 +267,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'physics',
     relatedPoints: ['physics-1', 'physics-4'],
     resources: [
-      { id: 'res16', title: '电场与磁场', type: 'video', url: 'https://www.bilibili.com/video/BV1Wx411Q7x1/', duration: 22 }
+      { id: 'res16', title: '电场与磁场', type: 'video', url: 'https://www.icourse163.org/course/THU-1001906001', duration: 22 }
     ],
     exercises: [
       { id: 'ex25', type: 'single', question: '电流的单位是？', options: ['伏特', '安培', '欧姆', '瓦特'], answer: 'B', explanation: '电流的单位是安培' }
@@ -429,7 +429,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'computer',
     relatedPoints: ['computer-1', 'computer-4'],
     resources: [
-      { id: 'res31', title: '数组与链表', type: 'video', url: 'https://www.bilibili.com/video/BV1Wx411Q7x1/', duration: 22 }
+      { id: 'res31', title: '数组与链表', type: 'video', url: 'https://www.icourse163.org/course/XJTU-1001691001', duration: 22 }
     ],
     exercises: [
       { id: 'ex40', type: 'single', question: '栈的特点是？', options: ['先进先出', '先进后出', '随机访问', '顺序访问'], answer: 'B', explanation: '栈是先进后出的数据结构' }
