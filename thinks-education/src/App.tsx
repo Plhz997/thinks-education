@@ -1,10 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Ethics } from './pages/Ethics';
 import { Knowledge } from './pages/Knowledge';
-import { KnowledgeGraph } from './pages/KnowledgeGraph';
 import { AIAssistant } from './pages/AIAssistant';
 import { LearningLoop } from './pages/LearningLoop';
 import { Observation } from './pages/Observation';
@@ -20,11 +20,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="ethics" element={<Ethics />} />
           <Route path="knowledge" element={<Knowledge />} />
-          <Route path="knowledge-graph" element={<KnowledgeGraph />} />
           <Route path="ai-assistant" element={<AIAssistant />} />
           <Route path="learning-loop" element={<LearningLoop />} />
           <Route path="observation" element={<Observation />} />

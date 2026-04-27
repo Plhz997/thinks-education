@@ -9,11 +9,10 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
-  LogIn,
-  AlertCircle
+  LogIn
 } from 'lucide-react'
 import { useAppStore } from '@/store'
-import { mockUsers, majorNames, validCredentials } from '@/data/mockData'
+import { mockUsers, majorNames } from '@/data/mockData'
 import { useNavigate } from 'react-router-dom'
 
 const roleOptions = [
@@ -25,12 +24,20 @@ const roleOptions = [
 const majorOptions = [
   { value: 'math', label: '数学教育' },
   { value: 'chinese', label: '语文教育' },
-  { value: 'primary-education', label: '小学教育' },
-  { value: 'preschool-education', label: '学前教育' },
-  { value: 'physical-education', label: '体育教育' },
-  { value: 'educational-technology', label: '教育技术学' },
-  { value: 'computer-education', label: '计算机师范' },
-  { value: 'special-education', label: '特殊教育' },
+  { value: 'physics', label: '物理教育' },
+  { value: 'chemistry', label: '化学教育' },
+  { value: 'biology', label: '生物教育' },
+  { value: 'english', label: '英语教育' },
+  { value: 'history', label: '历史教育' },
+  { value: 'geography', label: '地理教育' },
+  { value: 'music', label: '音乐教育' },
+  { value: 'art', label: '美术教育' },
+  { value: 'pe', label: '体育教育' },
+  { value: 'tech', label: '教育技术学' },
+  { value: 'primary', label: '小学教育' },
+  { value: 'preschool', label: '学前教育' },
+  { value: 'computer', label: '计算机师范' },
+  { value: 'special', label: '特殊教育' },
 ]
 
 export function Login() {
@@ -52,28 +59,28 @@ export function Login() {
       setError('请输入邮箱和密码')
       return
     }
-
-    if (validCredentials[email] !== password) {
-      setError('邮箱或密码错误')
-      return
-    }
-
-    const roleUsers = mockUsers[role]
-    const user = roleUsers[major] || roleUsers['default']
+    
+    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]')
+    const user = registeredUsers.find((u: any) => u.email === email && u.password === password)
     
     if (user) {
-      setUser({ ...user, major })
+      setUser({ ...user, major: user.major || major })
+      localStorage.setItem('currentUser', JSON.stringify(user))
       navigate('/')
     } else {
-      setError('用户不存在')
+      const mockUser = mockUsers[role]
+      if (mockUser && email === mockUser.email && password === '123456') {
+        setUser({ ...mockUser, major })
+        navigate('/')
+      } else {
+        setError('邮箱或密码错误')
+      }
     }
   }
 
   const handleQuickLogin = (roleType: string) => {
     setRole(roleType)
-    const roleUsers = mockUsers[roleType as keyof typeof mockUsers]
-    const user = roleUsers[major] || roleUsers['default']
-    
+    const user = mockUsers[roleType as keyof typeof mockUsers]
     if (user) {
       setUser({ ...user, major })
       navigate('/')
@@ -235,13 +242,12 @@ export function Login() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 p-3 bg-danger/10 text-danger rounded-xl mb-4"
+                className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
               >
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span>{error}</span>
+                {error}
               </motion.div>
             )}
-
+            
             <motion.button
               onClick={handleLogin}
               whileHover={{ scale: 1.02 }}
@@ -252,8 +258,18 @@ export function Login() {
               登录
             </motion.button>
 
+            <div className="mt-4 text-center">
+              <span className="text-sm text-text-secondary">还没有账号？</span>
+              <button
+                onClick={() => navigate('/register')}
+                className="ml-2 text-primary hover:text-primary-light font-medium"
+              >
+                立即注册
+              </button>
+            </div>
+
             <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-sm text-text-secondary mb-3 text-center">或快速登录</p>
+              <p className="text-sm text-text-secondary mb-3 text-center">或快速登录（演示用）</p>
               <div className="grid grid-cols-3 gap-3">
                 {roleOptions.map((option) => {
                   const Icon = option.icon
