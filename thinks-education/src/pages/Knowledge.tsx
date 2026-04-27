@@ -38,6 +38,8 @@ export function Knowledge() {
   const [selectedSubject, setSelectedSubject] = useState('math')
   const [selectedPoint, setSelectedPoint] = useState<string | null>(null)
   const [selectedTextbook, setSelectedTextbook] = useState('m1')
+  const [exerciseAnswers, setExerciseAnswers] = useState<Record<string, string | string[]>>({})
+  const [submittedExercises, setSubmittedExercises] = useState<Set<string>>(new Set())
 
   const handleSubjectChange = (subject: string) => {
     setSelectedSubject(subject)
@@ -46,6 +48,69 @@ export function Knowledge() {
       setSelectedTextbook(subjectTextbooks[0].id)
     }
     setSelectedPoint(null)
+    setExerciseAnswers({})
+    setSubmittedExercises(new Set())
+  }
+
+  const handleOptionSelect = (exerciseId: string, option: string) => {
+    const currentAnswer = exerciseAnswers[exerciseId]
+    const exercise = selectedPointData?.exercises.find(e => e.id === exerciseId)
+    if (exercise?.type === 'multiple') {
+      const currentAnswers = Array.isArray(currentAnswer) ? currentAnswer : []
+      if (currentAnswers.includes(option)) {
+        setExerciseAnswers({
+          ...exerciseAnswers,
+          [exerciseId]: currentAnswers.filter(o => o !== option)
+        })
+      } else {
+        setExerciseAnswers({
+          ...exerciseAnswers,
+          [exerciseId]: [...currentAnswers, option].sort()
+        })
+      }
+    } else {
+      setExerciseAnswers({
+        ...exerciseAnswers,
+        [exerciseId]: option
+      })
+    }
+  }
+
+  const handleFillInput = (exerciseId: string, value: string) => {
+    setExerciseAnswers({
+      ...exerciseAnswers,
+      [exerciseId]: value
+    })
+  }
+
+  const handleSubmitExercise = (exerciseId: string) => {
+    setSubmittedExercises(prev => new Set([...prev, exerciseId]))
+  }
+
+  const handleResetExercise = (exerciseId: string) => {
+    setSubmittedExercises(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(exerciseId)
+      return newSet
+    })
+    setExerciseAnswers(prev => {
+      const newAnswers = { ...prev }
+      delete newAnswers[exerciseId]
+      return newAnswers
+    })
+  }
+
+  const isAnswerCorrect = (exerciseId: string): boolean | null => {
+    const exercise = selectedPointData?.exercises.find(e => e.id === exerciseId)
+    const userAnswer = exerciseAnswers[exerciseId]
+    if (!exercise || userAnswer === undefined) return null
+    
+    if (Array.isArray(exercise.answer)) {
+      return Array.isArray(userAnswer) && 
+        exercise.answer.length === userAnswer.length &&
+        exercise.answer.every(a => userAnswer.includes(a))
+    }
+    return userAnswer === exercise.answer
   }
 
   const filteredPoints = mockKnowledgePoints.filter(p => 
@@ -202,20 +267,26 @@ export function Knowledge() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedPointData.resources.map((resource) => (
-                      <div key={resource.id} className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl hover:bg-primary/5 transition-colors cursor-pointer">
+                      <a
+                        key={resource.id}
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-4 p-4 bg-surface-tertiary rounded-xl hover:bg-primary/10 hover:border-primary/30 transition-all cursor-pointer group border border-transparent"
+                      >
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                           resource.type === 'video' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info'
                         }`}>
                           {resource.type === 'video' ? <Play className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-text-primary">{resource.title}</p>
+                          <p className="font-medium text-text-primary group-hover:text-primary transition-colors">{resource.title}</p>
                           <p className="text-sm text-text-tertiary">
                             {resource.type === 'video' ? `${resource.duration}分钟视频` : '文档资料'}
                           </p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-text-tertiary" />
-                      </div>
+                        <ExternalLink className="w-5 h-5 text-text-tertiary group-hover:text-primary transition-colors" />
+                      </a>
                     ))}
                   </div>
                 </div>
@@ -228,31 +299,119 @@ export function Knowledge() {
                     推荐练习
                   </h3>
                   <div className="space-y-4">
-                    {selectedPointData.exercises.map((exercise) => (
-                      <div key={exercise.id} className="p-4 bg-surface-tertiary rounded-xl">
-                        <p className="text-text-primary mb-3">{exercise.question}</p>
-                        {exercise.options && (
-                          <div className="grid grid-cols-2 gap-2 mb-3">
-                            {exercise.options.map((option, idx) => (
-                              <button
-                                key={idx}
-                                className={`px-4 py-2 rounded-lg text-sm transition-all ${
-                                  exercise.answer === String.fromCharCode(65 + idx)
-                                    ? 'bg-accent/10 text-accent border border-accent/30'
-                                    : 'bg-surface border border-border hover:border-primary/50'
-                                }`}
-                              >
-                                {String.fromCharCode(65 + idx)}. {option}
-                              </button>
-                            ))}
+                    {selectedPointData.exercises.map((exercise) => {
+                      const submitted = submittedExercises.has(exercise.id)
+                      const correct = isAnswerCorrect(exercise.id)
+                      const userAnswer = exerciseAnswers[exercise.id]
+                      const optionLabels = ['A', 'B', 'C', 'D']
+                      
+                      return (
+                        <div key={exercise.id} className="p-4 bg-surface-tertiary rounded-xl">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                                submitted && correct === true ? 'bg-green-100 text-green-600' :
+                                submitted && correct === false ? 'bg-red-100 text-red-600' :
+                                'bg-primary/10 text-primary'
+                              }`}>
+                                {submitted && correct === true ? '✓' : submitted && correct === false ? '✗' : '?'}
+                              </span>
+                              <span className="text-xs text-text-tertiary">{exercise.type === 'single' ? '单选题' : exercise.type === 'multiple' ? '多选题' : '填空题'}</span>
+                            </div>
                           </div>
-                        )}
-                        <div className="bg-accent/5 rounded-lg p-3">
-                          <p className="text-sm text-accent font-medium">解析：</p>
-                          <p className="text-sm text-text-secondary mt-1">{exercise.explanation}</p>
+                          
+                          <p className="text-text-primary mb-3">{exercise.question}</p>
+                          
+                          {exercise.type === 'fill' ? (
+                            <div className="mb-3">
+                              <input
+                                type="text"
+                                value={(userAnswer as string) || ''}
+                                onChange={(e) => handleFillInput(exercise.id, e.target.value)}
+                                disabled={submitted}
+                                placeholder="请输入答案"
+                                className="w-full px-4 py-2 bg-surface border border-border rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                              />
+                            </div>
+                          ) : exercise.options ? (
+                            <div className="grid grid-cols-2 gap-2 mb-3">
+                              {exercise.options.map((option, idx) => {
+                                const optionLabel = optionLabels[idx]
+                                const isSelected = Array.isArray(userAnswer) ? userAnswer.includes(optionLabel) : userAnswer === optionLabel
+                                const isCorrectOption = Array.isArray(exercise.answer) 
+                                  ? exercise.answer.includes(optionLabel) 
+                                  : exercise.answer === optionLabel
+                                
+                                let buttonClass = 'px-4 py-2 rounded-lg text-sm transition-all border'
+                                if (submitted) {
+                                  if (isCorrectOption) {
+                                    buttonClass += ' bg-green-100 text-green-700 border-green-300'
+                                  } else if (isSelected && !isCorrectOption) {
+                                    buttonClass += ' bg-red-100 text-red-700 border-red-300'
+                                  } else {
+                                    buttonClass += ' bg-surface border-border text-text-secondary'
+                                  }
+                                } else {
+                                  if (isSelected) {
+                                    buttonClass += ' bg-primary/10 text-primary border-primary/30'
+                                  } else {
+                                    buttonClass += ' bg-surface border-border hover:border-primary/50 text-text-primary'
+                                  }
+                                }
+                                
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => !submitted && handleOptionSelect(exercise.id, optionLabel)}
+                                    disabled={submitted}
+                                    className={buttonClass}
+                                  >
+                                    {optionLabel}. {option}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          ) : null}
+                          
+                          <div className="flex items-center gap-2 mb-3">
+                            {!submitted ? (
+                              <button
+                                onClick={() => handleSubmitExercise(exercise.id)}
+                                disabled={!userAnswer}
+                                className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                              >
+                                提交答案
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleResetExercise(exercise.id)}
+                                className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-surface transition-colors"
+                              >
+                                重新答题
+                              </button>
+                            )}
+                          </div>
+                          
+                          {submitted && (
+                            <div className={`rounded-lg p-3 ${
+                              correct === true ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                            }`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className={`text-sm font-medium ${correct === true ? 'text-green-700' : 'text-red-700'}`}>
+                                  {correct === true ? '回答正确！' : '回答错误'}
+                                </span>
+                                {exercise.answer && (
+                                  <span className="text-sm text-text-secondary">
+                                    正确答案：{Array.isArray(exercise.answer) ? exercise.answer.join(', ') : exercise.answer}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-text-secondary">{exercise.explanation}</p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
