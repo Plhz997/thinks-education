@@ -107,7 +107,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'math',
     relatedPoints: ['math-2', 'math-3'],
     resources: [
-      { id: 'res1', title: '导数概念讲解', type: 'video', url: 'https://www.bilibili.com/video/BV1aW411Q7x1/', duration: 15 },
+      { id: 'res1', title: '导数概念讲解', type: 'video', url: 'https://www.icourse163.org/course/HUBU-146009', duration: 15 },
       { id: 'res2', title: '导数应用案例', type: 'document', url: 'https://www.pep.com.cn/gzsx/jszx/xkbsyjc/gzsxbysjc/dzkb/202003/t20200302_1954532.htm' }
     ],
     exercises: [
@@ -125,7 +125,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'math',
     relatedPoints: ['math-1', 'math-4'],
     resources: [
-      { id: 'res3', title: '三角函数图像', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411Q799/', duration: 12 },
+      { id: 'res3', title: '三角函数图像', type: 'video', url: 'https://www.icourse163.org/course/HENUT-1001971001', duration: 12 },
       { id: 'res4', title: '三角函数公式', type: 'document', url: 'https://www.pep.com.cn/gzsx/jszx/xkbsyjc/gzsxbysjc/dzkb/202003/t20200302_1954533.htm' }
     ],
     exercises: [
@@ -143,7 +143,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'math',
     relatedPoints: ['math-1'],
     resources: [
-      { id: 'res5', title: '定积分概念', type: 'video', url: 'https://www.bilibili.com/video/BV18x411177o/', duration: 18 }
+      { id: 'res5', title: '定积分概念', type: 'video', url: 'https://www.icourse163.org/course/SDU-1002024001', duration: 18 }
     ],
     exercises: [
       { id: 'ex11', type: 'single', question: '∫x dx = ?', options: ['x^2', 'x^2/2', 'x^2/2 + C', '2x'], answer: 'C', explanation: '不定积分的结果' },
@@ -157,7 +157,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'math',
     relatedPoints: ['math-2'],
     resources: [
-      { id: 'res6', title: '等差数列', type: 'video', url: 'https://www.bilibili.com/video/BV1Ks411579J/', duration: 14 }
+      { id: 'res6', title: '等差数列', type: 'video', url: 'https://www.icourse163.org/course/XJTU-1001691001', duration: 14 }
     ],
     exercises: [
       { id: 'ex13', type: 'single', question: '等差数列 1, 3, 5, 7... 的公差是？', options: ['1', '2', '3', '4'], answer: 'B', explanation: '公差 d = 3 - 1 = 2' },
@@ -171,7 +171,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'math',
     relatedPoints: ['math-6'],
     resources: [
-      { id: 'res7', title: '概率基础', type: 'video', url: 'https://www.bilibili.com/video/BV1sb411i7ag/', duration: 16 }
+      { id: 'res7', title: '概率基础', type: 'video', url: 'https://www.icourse163.org/course/HIT-1001534001', duration: 16 }
     ],
     exercises: [
       { id: 'ex15', type: 'single', question: '掷一枚硬币，正面朝上的概率是？', options: ['0', '0.5', '1', '0.25'], answer: 'B', explanation: '正面和反面概率各为0.5' }
@@ -184,7 +184,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'math',
     relatedPoints: ['math-5'],
     resources: [
-      { id: 'res8', title: '空间向量', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411o7gC/', duration: 15 }
+      { id: 'res8', title: '空间向量', type: 'video', url: 'https://www.icourse163.org/course/HUST-1001898001', duration: 15 }
     ],
     exercises: [
       { id: 'ex16', type: 'single', question: '正方体的对角线长度是边长的几倍？', options: ['1', '√2', '√3', '2'], answer: 'C', explanation: '对角线 = √(a²+a²+a²) = a√3' }
@@ -197,7 +197,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chinese',
     relatedPoints: ['chinese-2', 'chinese-3'],
     resources: [
-      { id: 'res9', title: '现代文阅读技巧', type: 'video', url: 'https://www.bilibili.com/video/BV1Wx411K7Uv/', duration: 20 },
+      { id: 'res9', title: '现代文阅读技巧', type: 'video', url: 'https://www.icourse163.org/course/ZJU-1001978001', duration: 20 },
       { id: 'res10', title: '阅读理解答题方法', type: 'document', url: 'https://www.pep.com.cn/gzyw/jszx/tbjxzy/dzkb/bx1/202003/t20200302_1955254.htm' }
     ],
     exercises: [
@@ -212,7 +212,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chinese',
     relatedPoints: ['chinese-1', 'chinese-4'],
     resources: [
-      { id: 'res11', title: '文言文实词虚词', type: 'video', url: 'https://www.bilibili.com/video/BV1at411o7cF/', duration: 22 }
+      { id: 'res11', title: '文言文实词虚词', type: 'video', url: 'https://www.icourse163.org/course/PKU-1001710001', duration: 22 }
     ],
     exercises: [
       { id: 'ex19', type: 'single', question: '"之"在"吾欲之南海"中是什么意思？', options: ['的', '到、往', '代词', '取消句子独立性'], answer: 'B', explanation: '之在这里是动词，意为到、往' },
@@ -226,7 +226,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chinese',
     relatedPoints: ['chinese-1'],
     resources: [
-      { id: 'res12', title: '议论文写作', type: 'video', url: 'https://www.bilibili.com/video/BV1bt411o7cF/', duration: 18 }
+      { id: 'res12', title: '议论文写作', type: 'video', url: 'https://www.icourse163.org/course/BFSU-1001838001', duration: 18 }
     ],
     exercises: [
       { id: 'ex21', type: 'single', question: '议论文的三要素是？', options: ['论点、论据、论证', '开头、正文、结尾', '记叙、描写、议论', '时间、地点、人物'], answer: 'A', explanation: '议论文三要素是论点、论据、论证' }
@@ -239,7 +239,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chinese',
     relatedPoints: ['chinese-2'],
     resources: [
-      { id: 'res13', title: '古诗词鉴赏方法', type: 'video', url: 'https://www.bilibili.com/video/BV1jt411o7cF/', duration: 16 }
+      { id: 'res13', title: '古诗词鉴赏方法', type: 'video', url: 'https://www.icourse163.org/course/RUC-1001920001', duration: 16 }
     ],
     exercises: [
       { id: 'ex22', type: 'single', question: '"春风又绿江南岸"中"绿"字的词性是？', options: ['名词', '形容词', '动词', '副词'], answer: 'C', explanation: '绿在这里是使动用法，意为使...变绿' }
@@ -252,7 +252,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'physics',
     relatedPoints: ['physics-2', 'physics-3'],
     resources: [
-      { id: 'res14', title: '牛顿运动定律', type: 'video', url: 'https://www.bilibili.com/video/BV1Wx411B75M/', duration: 20 },
+      { id: 'res14', title: '牛顿运动定律', type: 'video', url: 'https://www.icourse163.org/course/ZJU-1001976001', duration: 20 },
       { id: 'res15', title: '力学基础', type: 'document', url: 'https://www.pep.com.cn/gzwl/gzwljszx/gzwlbx/gzwlkb/202003/t20200302_1954764.htm' }
     ],
     exercises: [
@@ -280,7 +280,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'physics',
     relatedPoints: ['physics-1'],
     resources: [
-      { id: 'res17', title: '热力学基础', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411o7qH/', duration: 18 }
+      { id: 'res17', title: '热力学基础', type: 'video', url: 'https://www.icourse163.org/course/HUST-1001896001', duration: 18 }
     ],
     exercises: [
       { id: 'ex26', type: 'single', question: '绝对零度是多少摄氏度？', options: ['0°C', '-100°C', '-273°C', '-373°C'], answer: 'C', explanation: '绝对零度是-273.15°C' }
@@ -293,7 +293,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'physics',
     relatedPoints: ['physics-2'],
     resources: [
-      { id: 'res18', title: '光的折射与反射', type: 'video', url: 'https://www.bilibili.com/video/BV1sb411i7ag/', duration: 16 }
+      { id: 'res18', title: '光的折射与反射', type: 'video', url: 'https://www.icourse163.org/course/HIT-1001534001', duration: 16 }
     ],
     exercises: [
       { id: 'ex27', type: 'single', question: '光在真空中的传播速度约为？', options: ['3×10^6 m/s', '3×10^7 m/s', '3×10^8 m/s', '3×10^9 m/s'], answer: 'C', explanation: '光速约为3×10^8 m/s' }
@@ -306,7 +306,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chemistry',
     relatedPoints: ['chemistry-2', 'chemistry-3'],
     resources: [
-      { id: 'res19', title: '原子结构', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411Q799/', duration: 18 },
+      { id: 'res19', title: '原子结构', type: 'video', url: 'https://www.icourse163.org/course/HENUT-1001971001', duration: 18 },
       { id: 'res20', title: '化学键', type: 'document', url: 'https://www.pep.com.cn/gzhx/gzhxjszx/gzhxbx1/gzhxkbsyjc/202003/t20200302_1954854.htm' }
     ],
     exercises: [
@@ -321,7 +321,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chemistry',
     relatedPoints: ['chemistry-1', 'chemistry-4'],
     resources: [
-      { id: 'res21', title: '化学平衡', type: 'video', url: 'https://www.bilibili.com/video/BV1At411o7cF/', duration: 20 }
+      { id: 'res21', title: '化学平衡', type: 'video', url: 'https://www.icourse163.org/course/NJU-1001872001', duration: 20 }
     ],
     exercises: [
       { id: 'ex30', type: 'single', question: '催化剂能改变什么？', options: ['反应热', '平衡常数', '反应速率', '反应物转化率'], answer: 'C', explanation: '催化剂只改变反应速率' }
@@ -334,7 +334,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chemistry',
     relatedPoints: ['chemistry-1'],
     resources: [
-      { id: 'res22', title: '烃类化合物', type: 'video', url: 'https://www.bilibili.com/video/BV1bt411o72q/', duration: 18 }
+      { id: 'res22', title: '烃类化合物', type: 'video', url: 'https://www.icourse163.org/course/TJU-1001834001', duration: 18 }
     ],
     exercises: [
       { id: 'ex31', type: 'single', question: '甲烷的分子式是？', options: ['CH4', 'C2H6', 'C3H8', 'C4H10'], answer: 'A', explanation: '甲烷是最简单的烷烃' }
@@ -347,7 +347,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'chemistry',
     relatedPoints: ['chemistry-2'],
     resources: [
-      { id: 'res23', title: '金属元素', type: 'video', url: 'https://www.bilibili.com/video/BV1xt411o7cF/', duration: 16 }
+      { id: 'res23', title: '金属元素', type: 'video', url: 'https://www.icourse163.org/course/SDU-1002022001', duration: 16 }
     ],
     exercises: [
       { id: 'ex32', type: 'single', question: '下列金属中最活泼的是？', options: ['铜', '铁', '钠', '铝'], answer: 'C', explanation: '钠是最活泼的金属之一' }
@@ -360,7 +360,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'biology',
     relatedPoints: ['biology-2', 'biology-3'],
     resources: [
-      { id: 'res24', title: '细胞结构', type: 'video', url: 'https://www.bilibili.com/video/BV1Wx411K7Uv/', duration: 20 },
+      { id: 'res24', title: '细胞结构', type: 'video', url: 'https://www.icourse163.org/course/ZJU-1001978001', duration: 20 },
       { id: 'res25', title: '细胞膜与细胞器', type: 'document', url: 'https://www.pep.com.cn/gzsw/jshzhx/kbjc/bx1/202003/t20200302_1955114.htm' }
     ],
     exercises: [
@@ -375,7 +375,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'biology',
     relatedPoints: ['biology-1', 'biology-4'],
     resources: [
-      { id: 'res26', title: '孟德尔遗传定律', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411o7gC/', duration: 22 }
+      { id: 'res26', title: '孟德尔遗传定律', type: 'video', url: 'https://www.icourse163.org/course/HUST-1001898001', duration: 22 }
     ],
     exercises: [
       { id: 'ex35', type: 'single', question: 'DNA的双螺旋结构是由谁发现的？', options: ['孟德尔', '沃森和克里克', '达尔文', '摩尔根'], answer: 'B', explanation: '沃森和克里克发现了DNA双螺旋结构' }
@@ -388,7 +388,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'biology',
     relatedPoints: ['biology-1'],
     resources: [
-      { id: 'res27', title: '生态系统', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411Q799/', duration: 18 }
+      { id: 'res27', title: '生态系统', type: 'video', url: 'https://www.icourse163.org/course/HENUT-1001971001', duration: 18 }
     ],
     exercises: [
       { id: 'ex36', type: 'single', question: '生态系统的组成包括？', options: ['生产者、消费者、分解者', '动物、植物、微生物', '生物群落和非生物环境', '以上都对'], answer: 'C', explanation: '生态系统包括生物群落和非生物环境' }
@@ -401,7 +401,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'biology',
     relatedPoints: ['biology-2'],
     resources: [
-      { id: 'res28', title: '神经调节', type: 'video', url: 'https://www.bilibili.com/video/BV1sb411i7ag/', duration: 16 }
+      { id: 'res28', title: '神经调节', type: 'video', url: 'https://www.icourse163.org/course/HIT-1001534001', duration: 16 }
     ],
     exercises: [
       { id: 'ex37', type: 'single', question: '胰岛素的主要功能是？', options: ['升高血糖', '降低血糖', '消化脂肪', '促进生长'], answer: 'B', explanation: '胰岛素能降低血糖浓度' }
@@ -414,7 +414,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'computer',
     relatedPoints: ['computer-2', 'computer-3'],
     resources: [
-      { id: 'res29', title: 'Python入门', type: 'video', url: 'https://www.bilibili.com/video/BV1Wx411B75M/', duration: 20 },
+      { id: 'res29', title: 'Python入门', type: 'video', url: 'https://www.icourse163.org/course/ZJU-1001976001', duration: 20 },
       { id: 'res30', title: '算法基础', type: 'document', url: 'https://www.pep.com.cn/xxjs/jszx/jcjf/xxjsjc/202003/t20200302_1955234.htm' }
     ],
     exercises: [
@@ -455,7 +455,7 @@ export const mockKnowledgePoints: KnowledgePoint[] = [
     subject: 'computer',
     relatedPoints: ['computer-2'],
     resources: [
-      { id: 'res33', title: 'TCP/IP协议', type: 'video', url: 'https://www.bilibili.com/video/BV1xs411o7qH/', duration: 16 }
+      { id: 'res33', title: 'TCP/IP协议', type: 'video', url: 'https://www.icourse163.org/course/HUST-1001896001', duration: 16 }
     ],
     exercises: [
       { id: 'ex42', type: 'single', question: 'HTTP协议默认端口是？', options: ['21', '22', '80', '443'], answer: 'C', explanation: 'HTTP默认端口是80' }
