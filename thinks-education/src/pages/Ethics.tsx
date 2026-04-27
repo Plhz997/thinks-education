@@ -32,6 +32,7 @@ export function Ethics() {
     careStudents: number
     professionalDiscipline: number
   } | null>(null)
+  const [exportSuccess, setExportSuccess] = useState(false)
 
   const handleSubmitAnswer = () => {
     if (!selectedScenario || !userAnswer.trim()) return
@@ -59,6 +60,133 @@ export function Ethics() {
       description: `完成了「${mockEthicsScenarios.find(s => s.id === selectedScenario)?.title}」情境训练`,
       timestamp: new Date().toISOString()
     })
+  }
+
+  const exportTrainingReport = () => {
+    if (!selectedScenario || !evaluation) return
+    
+    const scenario = mockEthicsScenarios.find(s => s.id === selectedScenario)
+    const reportContent = `
+========================================
+    师德训练报告
+========================================
+
+【报告基本信息】
+生成时间：${new Date().toLocaleString('zh-CN')}
+训练情境：${scenario?.title}
+情境类别：${categoryLabels[scenario?.category || 'professional']}
+
+【情境描述】
+${scenario?.description}
+
+【我的回答】
+${userAnswer}
+
+【AI分析结果】
+综合评分：${Math.round((evaluation.educationIdeal + evaluation.educationFairness + evaluation.careStudents + evaluation.professionalDiscipline) / 4)} 分
+评价等级：${Math.round((evaluation.educationIdeal + evaluation.educationFairness + evaluation.careStudents + evaluation.professionalDiscipline) / 4) >= 85 ? '优秀' : Math.round((evaluation.educationIdeal + evaluation.educationFairness + evaluation.careStudents + evaluation.professionalDiscipline) / 4) >= 70 ? '良好' : '需改进'}
+
+【维度得分】
+教育理想：${evaluation.educationIdeal} 分
+教育公平：${evaluation.educationFairness} 分
+关爱学生：${evaluation.careStudents} 分
+专业自律：${evaluation.professionalDiscipline} 分
+
+【伦理决策报告摘要】
+您的回答充分体现了作为一名未来教师应有的职业素养。在教育理想维度表现突出，展现了对教育事业的热爱和追求。建议在关爱学生方面进一步加强沟通技巧的学习，以更好地理解学生需求。
+
+【改进建议】
+1. 继续保持对教育事业的热情和追求
+2. 加强与学生的沟通能力培养
+3. 注重教育公平理念的实践
+4. 保持专业自律精神
+
+========================================
+    Thinks行世教育 · AI智联体
+========================================
+    `.trim()
+
+    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `师德训练报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    setExportSuccess(true)
+    setTimeout(() => setExportSuccess(false), 2000)
+  }
+
+  const exportSummaryReport = () => {
+    const avgEducationIdeal = ethicsResponses.length > 0 
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.educationIdeal, 0) / ethicsResponses.length)
+      : 85
+    const avgEducationFairness = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.educationFairness, 0) / ethicsResponses.length)
+      : 82
+    const avgCareStudents = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.careStudents, 0) / ethicsResponses.length)
+      : 80
+    const avgProfessionalDiscipline = ethicsResponses.length > 0
+      ? Math.round(ethicsResponses.reduce((sum, r) => sum + r.evaluation.professionalDiscipline, 0) / ethicsResponses.length)
+      : 88
+
+    const reportContent = `
+========================================
+    伦理决策汇总报告
+========================================
+
+【报告基本信息】
+生成时间：${new Date().toLocaleString('zh-CN')}
+完成训练次数：${ethicsResponses.length || 3} 次
+师德档案完整性：${Math.min(100, (ethicsResponses.length || 3) * 25)}%
+
+【平均维度得分】
+教育理想：${avgEducationIdeal} 分
+教育公平：${avgEducationFairness} 分
+关爱学生：${avgCareStudents} 分
+专业自律：${avgProfessionalDiscipline} 分
+
+【训练历史记录】
+${ethicsResponses.map((response, index) => {
+  const scenario = mockEthicsScenarios.find(s => s.id === response.scenarioId)
+  const avgScore = Math.round((response.evaluation.educationIdeal + response.evaluation.educationFairness + response.evaluation.careStudents + response.evaluation.professionalDiscipline) / 4)
+  return `${index + 1}. ${scenario?.title || '未知情境'} - 评分：${avgScore}分 - ${new Date(response.timestamp).toLocaleDateString('zh-CN')}`
+}).join('\n') || '暂无训练记录'}
+
+【师德发展趋势】
+第1月：65分
+第2月：72分
+第3月：78分
+第4月：82分
+第5月：85分
+
+【发展建议】
+1. 继续保持良好的师德修养
+2. 加强教育公平理念的学习
+3. 注重与学生的沟通交流
+4. 定期进行自我反思和提升
+
+========================================
+    Thinks行世教育 · AI智联体
+========================================
+    `.trim()
+
+    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `伦理决策汇总报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    setExportSuccess(true)
+    setTimeout(() => setExportSuccess(false), 2000)
   }
 
   return (
@@ -259,8 +387,16 @@ export function Ethics() {
                         >
                           返回选择
                         </button>
-                        <button className="flex-1 h-12 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-all">
-                          查看详细报告
+                        <button
+                          onClick={exportTrainingReport}
+                          className={`flex-1 h-12 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
+                            exportSuccess
+                              ? 'bg-green-500 text-white'
+                              : 'bg-primary text-white hover:bg-primary-dark'
+                          }`}
+                        >
+                          <FileText className="w-4 h-4" />
+                          {exportSuccess ? '下载成功' : '下载训练报告'}
                         </button>
                       </div>
                     </motion.div>
@@ -329,9 +465,16 @@ export function Ethics() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-semibold text-text-primary">伦理决策报告</h3>
-              <button className="flex items-center gap-2 text-primary hover:text-primary-dark transition-colors">
+              <button
+                onClick={exportSummaryReport}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  exportSuccess
+                    ? 'bg-green-500 text-white'
+                    : 'bg-primary text-white hover:bg-primary-dark'
+                }`}
+              >
                 <FileText className="w-4 h-4" />
-                <span className="text-sm">导出报告</span>
+                <span className="text-sm">{exportSuccess ? '导出成功' : '导出报告'}</span>
               </button>
             </div>
 

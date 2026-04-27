@@ -42,7 +42,32 @@ export const useAppStore = create<AppState>((set) => ({
   qaMessages: [],
   growthRecords: [],
   studentProfile: null,
-  ethicsResponses: [],
+  ethicsResponses: [
+    {
+      id: 'ethics-1',
+      scenarioId: 's1',
+      userId: 'u1',
+      answer: '面对家长送礼的情况，我会礼貌地拒绝，并向家长说明我们教师的职业操守和学校的相关规定。我会强调教育公平的重要性，让家长理解真正对孩子好的方式是配合学校教育，而不是送礼。同时，我会保持专业和友好的态度，避免让家长感到尴尬。',
+      evaluation: { educationIdeal: 88, educationFairness: 92, careStudents: 85, professionalDiscipline: 95 },
+      timestamp: '2024-04-15T10:30:00'
+    },
+    {
+      id: 'ethics-2',
+      scenarioId: 's2',
+      userId: 'u1',
+      answer: '当学生发生冲突时，我会首先分开双方，确保他们的安全。然后分别听取双方的陈述，了解事情的经过。在处理过程中，我会保持中立和公正，引导学生认识到自己的错误，并学会用和平的方式解决问题。同时，我会联系班主任和家长，共同做好后续的教育工作。',
+      evaluation: { educationIdeal: 82, educationFairness: 88, careStudents: 90, professionalDiscipline: 85 },
+      timestamp: '2024-04-18T14:20:00'
+    },
+    {
+      id: 'ethics-3',
+      scenarioId: 's3',
+      userId: 'u1',
+      answer: '在教学中，我会注意公平对待每一个学生，不因学生的成绩、家庭背景等因素而有所区别。我会关注每个学生的学习情况，为学习困难的学生提供额外的帮助，同时鼓励成绩好的学生继续努力。我相信每个学生都有潜力，应该得到平等的发展机会。',
+      evaluation: { educationIdeal: 90, educationFairness: 95, careStudents: 88, professionalDiscipline: 92 },
+      timestamp: '2024-04-22T09:15:00'
+    }
+  ],
   currentSemester: '2024-2025 第二学期',
   closedLoopProgress: 65,
   
