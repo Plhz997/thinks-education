@@ -13,20 +13,46 @@ const subjectOptions = [
 ]
 
 const textbookVersions = [
-  { id: 'v1', name: '人教版高中数学必修一', subject: 'math' },
-  { id: 'v2', name: '北师大版高中数学', subject: 'math' },
-  { id: 'v3', name: '苏教版高中数学', subject: 'math' },
+  { id: 'm1', name: '人教版高中数学必修一', subject: 'math' },
+  { id: 'm2', name: '北师大版高中数学', subject: 'math' },
+  { id: 'm3', name: '苏教版高中数学', subject: 'math' },
+  { id: 'c1', name: '人教版高中语文必修一', subject: 'chinese' },
+  { id: 'c2', name: '苏教版高中语文', subject: 'chinese' },
+  { id: 'c3', name: '粤教版高中语文', subject: 'chinese' },
+  { id: 'p1', name: '人教版高中物理必修一', subject: 'physics' },
+  { id: 'p2', name: '教科版高中物理', subject: 'physics' },
+  { id: 'p3', name: '沪科版高中物理', subject: 'physics' },
+  { id: 'ch1', name: '人教版高中化学必修一', subject: 'chemistry' },
+  { id: 'ch2', name: '苏教版高中化学', subject: 'chemistry' },
+  { id: 'ch3', name: '鲁科版高中化学', subject: 'chemistry' },
+  { id: 'b1', name: '人教版高中生物必修一', subject: 'biology' },
+  { id: 'b2', name: '苏教版高中生物', subject: 'biology' },
+  { id: 'b3', name: '浙科版高中生物', subject: 'biology' },
+  { id: 'co1', name: '人教版信息技术必修', subject: 'computer' },
+  { id: 'co2', name: '粤教版信息技术', subject: 'computer' },
+  { id: 'co3', name: '教科版信息技术', subject: 'computer' },
 ]
 
 export function Knowledge() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('math')
   const [selectedPoint, setSelectedPoint] = useState<string | null>(null)
-  const [selectedTextbook, setSelectedTextbook] = useState('v1')
+  const [selectedTextbook, setSelectedTextbook] = useState('m1')
+
+  const handleSubjectChange = (subject: string) => {
+    setSelectedSubject(subject)
+    const subjectTextbooks = textbookVersions.filter(v => v.subject === subject)
+    if (subjectTextbooks.length > 0) {
+      setSelectedTextbook(subjectTextbooks[0].id)
+    }
+    setSelectedPoint(null)
+  }
 
   const filteredPoints = mockKnowledgePoints.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.description.toLowerCase().includes(searchQuery.toLowerCase())
+    p.subject === selectedSubject && (
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   )
 
   const selectedPointData = mockKnowledgePoints.find(p => p.id === selectedPoint)
@@ -60,7 +86,7 @@ export function Knowledge() {
               {subjectOptions.map((subject) => (
                 <button
                   key={subject.value}
-                  onClick={() => setSelectedSubject(subject.value)}
+                  onClick={() => handleSubjectChange(subject.value)}
                   className={`px-3 py-2 rounded-lg text-sm transition-all ${
                     selectedSubject === subject.value
                       ? 'bg-primary text-white'

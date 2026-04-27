@@ -83,6 +83,7 @@ export interface KnowledgePoint {
   id: string
   name: string
   description: string
+  subject: string
   relatedPoints: string[]
   resources: {
     id: string
@@ -96,7 +97,7 @@ export interface KnowledgePoint {
     type: string
     question: string
     options?: string[]
-    answer: string
+    answer: string | string[]
     explanation: string
   }[]
 }
