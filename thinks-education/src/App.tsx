@@ -4,6 +4,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Ethics } from './pages/Ethics';
 import { Knowledge } from './pages/Knowledge';
+import { KnowledgeGraph } from './pages/KnowledgeGraph';
 import { AIAssistant } from './pages/AIAssistant';
 import { LearningLoop } from './pages/LearningLoop';
 import { Observation } from './pages/Observation';
@@ -23,6 +24,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="ethics" element={<Ethics />} />
           <Route path="knowledge" element={<Knowledge />} />
+          <Route path="knowledge-graph" element={<KnowledgeGraph />} />
           <Route path="ai-assistant" element={<AIAssistant />} />
           <Route path="learning-loop" element={<LearningLoop />} />
           <Route path="observation" element={<Observation />} />

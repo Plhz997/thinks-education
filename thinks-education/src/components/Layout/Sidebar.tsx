@@ -32,6 +32,7 @@ const menuItemsByRole = {
     { id: '', label: '总览仪表盘', icon: LayoutDashboard },
     { id: 'ethics', label: '职业信念培养', icon: Heart },
     { id: 'knowledge', label: '课程匹配', icon: BookOpen },
+    { id: 'knowledge-graph', label: '知识图谱', icon: Database },
     { id: 'ai-assistant', label: 'AI助教', icon: MessageCircle },
     { id: 'learning-loop', label: '学习闭环', icon: RefreshCw },
     { id: 'observation', label: '见习评课', icon: Video },
