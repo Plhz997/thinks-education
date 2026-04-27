@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { BookOpen, Search, Download, ChevronRight, Play, FileText, Tag, Lightbulb, ExternalLink } from 'lucide-react'
 import { mockKnowledgePoints } from '@/data/mockData'
+import { useAppStore } from '@/store'
 
 const subjectOptions = [
   { value: 'math', label: '数学' },
@@ -33,13 +34,50 @@ const textbookVersions = [
   { id: 'co3', name: '教科版信息技术', subject: 'computer' },
 ]
 
+const majorToSubject: Record<string, string> = {
+  'math': 'math',
+  'chinese': 'chinese',
+  'physics': 'physics',
+  'chemistry': 'chemistry',
+  'biology': 'biology',
+  'english': 'chinese',
+  'history': 'chinese',
+  'geography': 'physics',
+  'music': 'computer',
+  'art': 'computer',
+  'pe': 'biology',
+  'tech': 'computer',
+  'primary': 'math',
+  'preschool': 'math',
+  'computer': 'computer',
+  'special': 'math',
+  'primary-education': 'math',
+  'preschool-education': 'math',
+  'physical-education': 'biology',
+  'educational-technology': 'computer',
+  'computer-education': 'computer',
+  'special-education': 'math'
+}
+
 export function Knowledge() {
+  const { user } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('math')
   const [selectedPoint, setSelectedPoint] = useState<string | null>(null)
   const [selectedTextbook, setSelectedTextbook] = useState('m1')
   const [exerciseAnswers, setExerciseAnswers] = useState<Record<string, string | string[]>>({})
   const [submittedExercises, setSubmittedExercises] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (user) {
+      const subject = majorToSubject[user.major] || 'math'
+      setSelectedSubject(subject)
+      const subjectTextbooks = textbookVersions.filter(v => v.subject === subject)
+      if (subjectTextbooks.length > 0) {
+        setSelectedTextbook(subjectTextbooks[0].id)
+      }
+    }
+  }, [user])
 
   const handleSubjectChange = (subject: string) => {
     setSelectedSubject(subject)
@@ -51,6 +89,9 @@ export function Knowledge() {
     setExerciseAnswers({})
     setSubmittedExercises(new Set())
   }
+
+  const userSubject = user ? majorToSubject[user.major] : null
+  const isSubjectLocked = !!userSubject
 
   const handleOptionSelect = (exerciseId: string, option: string) => {
     const currentAnswer = exerciseAnswers[exerciseId]
@@ -146,22 +187,33 @@ export function Knowledge() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-surface rounded-xl border border-border p-4">
-            <label className="block text-sm font-medium text-text-secondary mb-2">学科选择</label>
-            <div className="grid grid-cols-2 gap-2">
-              {subjectOptions.map((subject) => (
-                <button
-                  key={subject.value}
-                  onClick={() => handleSubjectChange(subject.value)}
-                  className={`px-3 py-2 rounded-lg text-sm transition-all ${
-                    selectedSubject === subject.value
-                      ? 'bg-primary text-white'
-                      : 'bg-surface-tertiary text-text-secondary hover:text-text-primary'
-                  }`}
-                >
-                  {subject.label}
-                </button>
-              ))}
-            </div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              {isSubjectLocked ? '我的专业' : '学科选择'}
+            </label>
+            {isSubjectLocked ? (
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-2 bg-primary text-white rounded-lg text-sm">
+                  {subjectOptions.find(s => s.value === userSubject)?.label || '数学'}
+                </div>
+                <span className="text-xs text-text-tertiary">已根据专业自动匹配</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {subjectOptions.map((subject) => (
+                  <button
+                    key={subject.value}
+                    onClick={() => handleSubjectChange(subject.value)}
+                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                      selectedSubject === subject.value
+                        ? 'bg-primary text-white'
+                        : 'bg-surface-tertiary text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    {subject.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-surface rounded-xl border border-border p-4">
