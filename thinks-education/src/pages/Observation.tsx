@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Video, FileText, Star, Calendar, Clock, User, Play } from 'lucide-react'
+import { Video, FileText, Star, Calendar, Clock, User, Play, Mic, MessageSquare, Eye, LineChart, BarChart3, CheckCircle, AlertCircle } from 'lucide-react'
 import { useAppStore } from '@/store'
 
 const mockObservations = [
@@ -15,9 +15,27 @@ const mockClassRecordings = [
   { id: 'cr3', title: '新教师汇报课 - 立体几何', duration: 40, views: 89, date: '2024-04-08' },
 ]
 
+const mockFeedbackMetrics = [
+  { name: '语速稳定性', score: 85, maxScore: 100, suggestion: '语速适中，建议在重点内容处适当放慢', status: 'good' },
+  { name: '表达清晰度', score: 88, maxScore: 100, suggestion: '语言表达清晰，逻辑连贯', status: 'good' },
+  { name: '内容完整性', score: 75, maxScore: 100, suggestion: '内容覆盖较全面，建议增加实例说明', status: 'medium' },
+  { name: '结构合理性', score: 82, maxScore: 100, suggestion: '整体结构合理，过渡自然', status: 'good' },
+  { name: '互动有效性', score: 72, maxScore: 100, suggestion: '增加提问频率，鼓励学生参与', status: 'medium' },
+  { name: '情绪感染力', score: 78, maxScore: 100, suggestion: '适当增加肢体语言和表情变化', status: 'medium' },
+]
+
+const mockTranscript = [
+  { time: '00:00', text: '同学们好，今天我们来学习三角函数的图像与性质。', type: 'teacher' },
+  { time: '00:15', text: '首先，请大家回忆一下什么是三角函数？', type: 'teacher' },
+  { time: '00:30', text: '很好，三角函数包括正弦函数、余弦函数和正切函数。', type: 'teacher' },
+  { time: '01:00', text: '下面我们来看正弦函数的图像。', type: 'teacher' },
+  { time: '01:30', text: '从图像中我们可以看出，正弦函数是一个周期函数。', type: 'teacher' },
+  { time: '02:00', text: '它的周期是2π，也就是360度。', type: 'teacher' },
+]
+
 export function Observation() {
   const { addGrowthRecord } = useAppStore()
-  const [activeTab, setActiveTab] = useState<'my-observations' | 'class-library' | 'evaluation'>('my-observations')
+  const [activeTab, setActiveTab] = useState<'my-observations' | 'class-library' | 'evaluation' | 'mock-teaching'>('my-observations')
   const [selectedObservation, setSelectedObservation] = useState<string | null>(null)
   const [evaluationForm, setEvaluationForm] = useState({
     teachingDesign: 85,
@@ -26,6 +44,9 @@ export function Observation() {
     teachingEffect: 82,
     overallComment: ''
   })
+  const [isRecording, setIsRecording] = useState(false)
+  const [showAnalysis, setShowAnalysis] = useState(false)
+  const [analysisData, setAnalysisData] = useState<typeof mockFeedbackMetrics>([])
 
   const handleSubmitEvaluation = () => {
     addGrowthRecord({
@@ -37,6 +58,25 @@ export function Observation() {
     setSelectedObservation(null)
   }
 
+  const handleStartRecording = () => {
+    setIsRecording(true)
+    setTimeout(() => {
+      setIsRecording(false)
+      setShowAnalysis(true)
+      setAnalysisData(mockFeedbackMetrics)
+      addGrowthRecord({
+        type: 'practice',
+        title: '虚拟试讲练习',
+        description: '完成了一次虚拟试讲并获得AI分析反馈',
+        timestamp: new Date().toISOString()
+      })
+    }, 10000)
+  }
+
+  const averageScore = analysisData.length > 0
+    ? Math.round(analysisData.reduce((sum, m) => sum + m.score, 0) / analysisData.length)
+    : 0
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -45,8 +85,8 @@ export function Observation() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">见习评课</h1>
-          <p className="text-text-secondary mt-1">观察课堂教学，进行专业评课与反思</p>
+          <h1 className="text-2xl font-bold text-text-primary">教学反馈与分析</h1>
+          <p className="text-text-secondary mt-1">见习评课、虚拟试讲评估与多模态数据分析</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -64,12 +104,16 @@ export function Observation() {
             { id: 'my-observations', label: '我的听课记录', icon: FileText },
             { id: 'class-library', label: '课堂资源库', icon: Video },
             { id: 'evaluation', label: '评分标准', icon: Star },
+            { id: 'mock-teaching', label: '虚拟试讲', icon: Mic },
           ].map((tab) => {
             const Icon = tab.icon
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                onClick={() => {
+                  setActiveTab(tab.id as typeof activeTab)
+                  setShowAnalysis(false)
+                }}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${
                   activeTab === tab.id
                     ? 'bg-primary text-white'
@@ -231,6 +275,180 @@ export function Observation() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'mock-teaching' && (
+          <div className="space-y-6">
+            {!showAnalysis ? (
+              <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl p-8 text-center">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto mb-6">
+                  <Mic className="w-12 h-12 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-text-primary mb-2">虚拟试讲评估</h3>
+                <p className="text-text-secondary mb-8">点击下方按钮开始录制您的试讲，系统将对您的表现进行多维度分析</p>
+                
+                <motion.button
+                  onClick={handleStartRecording}
+                  disabled={isRecording}
+                  whileHover={!isRecording ? { scale: 1.05 } : {}}
+                  whileTap={!isRecording ? { scale: 0.95 } : {}}
+                  className={`w-32 h-32 rounded-full flex flex-col items-center justify-center gap-2 transition-all ${
+                    isRecording
+                      ? 'bg-danger animate-pulse'
+                      : 'bg-gradient-to-br from-primary to-secondary hover:shadow-lg hover:shadow-primary/25'
+                  } text-white`}
+                >
+                  {isRecording ? (
+                    <>
+                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                        <Mic className="w-10 h-10" />
+                      </motion.div>
+                      <span className="text-sm font-medium">录制中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-10 h-10" />
+                      <span className="text-sm font-medium">开始试讲</span>
+                    </>
+                  )}
+                </motion.button>
+                
+                <p className="mt-6 text-text-tertiary text-sm">建议录制时长：5-10分钟</p>
+                
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { icon: Mic, label: '语音分析', desc: '语速、语调、流畅度' },
+                    { icon: MessageSquare, label: '内容分析', desc: '完整性、逻辑性、准确性' },
+                    { icon: Eye, label: '行为分析', desc: '肢体语言、表情变化' },
+                  ].map((item) => {
+                    const Icon = item.icon
+                    return (
+                      <div key={item.label} className="flex items-center gap-3 p-4 bg-surface rounded-xl">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <Icon className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium text-text-primary">{item.label}</p>
+                          <p className="text-sm text-text-tertiary">{item.desc}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="bg-gradient-to-br from-accent/20 to-primary/20 rounded-xl p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-text-primary">试讲分析报告</h3>
+                      <p className="text-text-secondary text-sm mt-1">多模态数据分析结果</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-4xl font-bold text-primary">{averageScore}</p>
+                      <p className="text-text-tertiary text-sm">综合评分</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-surface rounded-xl border border-border p-6">
+                    <h4 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                      <LineChart className="w-5 h-5 text-primary" />
+                      维度得分
+                    </h4>
+                    <div className="space-y-4">
+                      {analysisData.map((metric) => (
+                        <div key={metric.name}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-text-primary">{metric.name}</span>
+                            <span className={`font-medium ${
+                              metric.score >= 80 ? 'text-accent' : metric.score >= 70 ? 'text-warning' : 'text-danger'
+                            }`}>
+                              {metric.score}分
+                            </span>
+                          </div>
+                          <div className="h-3 bg-surface-tertiary rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${metric.score}%` }}
+                              transition={{ duration: 0.8, delay: 0.2 }}
+                              className={`h-full rounded-full ${
+                                metric.score >= 80 ? 'bg-accent' : metric.score >= 70 ? 'bg-warning' : 'bg-danger'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-surface rounded-xl border border-border p-6">
+                    <h4 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-secondary" />
+                      分析建议
+                    </h4>
+                    <div className="space-y-3">
+                      {analysisData.map((metric) => (
+                        <div key={metric.name} className={`p-3 rounded-lg ${
+                          metric.status === 'good' ? 'bg-green-50' : 'bg-yellow-50'
+                        }`}>
+                          <div className="flex items-center gap-2 mb-1">
+                            {metric.status === 'good' ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 text-yellow-600" />
+                            )}
+                            <span className={`font-medium ${
+                              metric.status === 'good' ? 'text-green-700' : 'text-yellow-700'
+                            }`}>
+                              {metric.name}
+                            </span>
+                          </div>
+                          <p className="text-sm text-text-secondary ml-6">{metric.suggestion}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-surface rounded-xl border border-border p-6">
+                  <h4 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-info" />
+                    语音转写文本
+                  </h4>
+                  <div className="bg-surface-tertiary rounded-xl p-4 max-h-40 overflow-y-auto">
+                    {mockTranscript.map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 mb-2">
+                        <span className="text-text-tertiary text-sm font-mono flex-shrink-0">{item.time}</span>
+                        <span className={`text-text-primary text-sm ${
+                          item.type === 'teacher' ? 'font-medium' : 'italic'
+                        }`}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowAnalysis(false)}
+                    className="flex-1 py-3 border border-border text-text-primary rounded-xl hover:bg-surface-tertiary transition-colors"
+                  >
+                    重新录制
+                  </button>
+                  <button className="flex-1 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors">
+                    保存报告
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </div>
         )}
       </div>
